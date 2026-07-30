@@ -3,6 +3,10 @@
 [ext_resource type="Script" uid="uid://chxytlf8oncdx" path="res://scripts/slime.gd" id="1_n6pvg"]
 [ext_resource type="Texture2D" uid="uid://bkaw0d77ke1m7" path="res://assets/brackeys_platformer_assets/sprites/slime_green.png" id="1_p2gj0"]
 [ext_resource type="PackedScene" uid="uid://crxqvo3cr0ptm" path="res://scenes/killzone.tscn" id="2_n6pvg"]
+[ext_resource type="PackedScene" uid="uid://xvwe10ny2snw" path="res://scenes/coin.tscn" id="2_pjw23"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kie8b"]
+size = Vector2(14, 13)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_pjw23"]
 atlas = ExtResource("1_p2gj0")
@@ -78,8 +82,15 @@ size = Vector2(14, 13.5)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3vyb7"]
 size = Vector2(14, 14)
 
-[node name="Slime" type="Node2D" unique_id=1661787814]
+[node name="Slime" type="CharacterBody2D" unique_id=293643367]
+collision_layer = 4
+collision_mask = 9
 script = ExtResource("1_n6pvg")
+coin_scene = ExtResource("2_pjw23")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1948821567]
+position = Vector2(0, 4.5)
+shape = SubResource("RectangleShape2D_kie8b")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1253027970]
 sprite_frames = SubResource("SpriteFrames_4kxuq")
@@ -87,6 +98,7 @@ animation = &"slime_hit"
 autoplay = "default"
 
 [node name="Killzone" parent="." unique_id=820134560 instance=ExtResource("2_n6pvg")]
+collision_mask = 3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Killzone" unique_id=539744361]
 position = Vector2(0, 4.75)
@@ -95,10 +107,12 @@ shape = SubResource("RectangleShape2D_4kxuq")
 [node name="RayCastRight" type="RayCast2D" parent="." unique_id=1748321256]
 position = Vector2(0, 6)
 target_position = Vector2(14, 0)
+collision_mask = 9
 
 [node name="RayCastLeft" type="RayCast2D" parent="." unique_id=1757222041]
 position = Vector2(0, 6)
 target_position = Vector2(-14, 0)
+collision_mask = 9
 
 [node name="Hurtbox" type="Area2D" parent="." unique_id=179307981]
 

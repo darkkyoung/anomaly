@@ -40,7 +40,7 @@ func _process(delta: float) -> void:
 	# 넉백 속도를 점점 0으로 줄임
 	knockback_velocity = move_toward(knockback_velocity, 5.0, KNOCKBACK_FRICTION * delta)
 
-#피격 애니메이션
+
 func take_damage(damage: int, knockback_direction: int = 0, knockback_power: float = 180.0) -> void:
 	if is_dead:
 		return
@@ -54,7 +54,7 @@ func take_damage(damage: int, knockback_direction: int = 0, knockback_power: flo
 	else:
 		play_hit_animation()
 
-
+#피격 애니메이션
 func play_hit_animation() -> void:
 	hit_anim_id += 1
 	var this_hit_id = hit_anim_id

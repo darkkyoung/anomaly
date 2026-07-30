@@ -1,15 +1,20 @@
 [gd_scene format=3 uid="uid://b478s4bqk8qhc"]
 
 [ext_resource type="Script" uid="uid://dca4mqdour60m" path="res://scripts/game_manager.gd" id="1_0tnpc"]
+[ext_resource type="Script" uid="uid://cbvx57ew8q8vx" path="res://scripts/HealthUI.gd" id="1_kvpfn"]
 [ext_resource type="PackedScene" uid="uid://bvlspeh4o0r7a" path="res://scenes/player.tscn" id="1_yqjtg"]
 [ext_resource type="Script" uid="uid://csfs2l7vrajoq" path="res://scripts/player.gd" id="2_lnu2h"]
-[ext_resource type="FontFile" uid="uid://d1tu0fx6nbkre" path="res://assets/brackeys_platformer_assets/brackeys_platformer_assets/fonts/PixelOperator8-Bold.ttf" id="2_vtaks"]
-[ext_resource type="Texture2D" uid="uid://b5klyg0leeeer" path="res://assets/brackeys_platformer_assets/brackeys_platformer_assets/sprites/world_tileset.png" id="3_lnu2h"]
+[ext_resource type="FontFile" uid="uid://d1tu0fx6nbkre" path="res://assets/brackeys_platformer_assets/fonts/PixelOperator8-Bold.ttf" id="2_vtaks"]
+[ext_resource type="Texture2D" uid="uid://b5klyg0leeeer" path="res://assets/brackeys_platformer_assets/sprites/world_tileset.png" id="3_lnu2h"]
 [ext_resource type="PackedScene" uid="uid://cqojegkawgmja" path="res://scenes/platform.tscn" id="4_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://xvwe10ny2snw" path="res://scenes/coin.tscn" id="5_iywne"]
 [ext_resource type="PackedScene" uid="uid://crxqvo3cr0ptm" path="res://scenes/killzone.tscn" id="5_p57ef"]
 [ext_resource type="PackedScene" uid="uid://cid4hv0uncd4e" path="res://scenes/slime.tscn" id="7_u5sy4"]
-[ext_resource type="FontFile" uid="uid://qeomp0sylakh" path="res://assets/brackeys_platformer_assets/brackeys_platformer_assets/fonts/PixelOperator8.ttf" id="8_gee14"]
+[ext_resource type="FontFile" uid="uid://qeomp0sylakh" path="res://assets/brackeys_platformer_assets/fonts/PixelOperator8.ttf" id="8_gee14"]
+[ext_resource type="PackedScene" uid="uid://crhp2uulylfcw" path="res://scenes/Box.tscn" id="11_dinhu"]
+[ext_resource type="PackedScene" uid="uid://bu6oj2dktelf1" path="res://scenes/miniboss.tscn" id="11_kvuet"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_i1r2h"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lbhrr"]
 texture = ExtResource("3_lnu2h")
@@ -182,6 +187,7 @@ texture = ExtResource("3_lnu2h")
 
 [sub_resource type="TileSet" id="TileSet_4kxuq"]
 physics_layer_0/collision_layer = 1
+physics_layer_0/physics_material = SubResource("PhysicsMaterial_i1r2h")
 sources/0 = SubResource("TileSetAtlasSource_lbhrr")
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_4kxuq"]
@@ -263,10 +269,10 @@ limit_bottom = 120
 limit_smoothed = true
 position_smoothing_enabled = true
 
-[node name="Killzone" parent="." unique_id=820134560 instance=ExtResource("5_p57ef")]
+[node name="UnderZone" parent="." unique_id=820134560 instance=ExtResource("5_p57ef")]
 position = Vector2(0, -3)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Killzone" unique_id=648014054]
+[node name="UnderZoneLine" type="CollisionShape2D" parent="UnderZone" unique_id=648014054]
 position = Vector2(79, 114)
 shape = SubResource("WorldBoundaryShape2D_4kxuq")
 
@@ -316,3 +322,26 @@ position = Vector2(72, 27)
 
 [node name="Slime2" parent="Enemy" unique_id=1215876439 instance=ExtResource("7_u5sy4")]
 position = Vector2(725, -18)
+
+[node name="Miniboss" parent="Enemy" unique_id=1449694551 instance=ExtResource("11_kvuet")]
+position = Vector2(55, 27)
+
+[node name="Box" type="Node" parent="." unique_id=358191698]
+
+[node name="Box" parent="Box" unique_id=377382211 instance=ExtResource("11_dinhu")]
+position = Vector2(99, -40)
+
+[node name="Box2" parent="Box" unique_id=1225711327 instance=ExtResource("11_dinhu")]
+position = Vector2(279, -90)
+
+[node name="Screen UI" type="CanvasLayer" parent="." unique_id=2030386113]
+
+[node name="HealthbarUI" type="ProgressBar" parent="Screen UI" unique_id=1060633208]
+offset_left = 9.0
+offset_top = 8.0
+offset_right = 205.0
+offset_bottom = 57.0
+max_value = 10.0
+value = 10.0
+show_percentage = false
+script = ExtResource("1_kvpfn")

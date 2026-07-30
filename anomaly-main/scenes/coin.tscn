@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://xvwe10ny2snw"]
 
 [ext_resource type="Script" uid="uid://dk2sou2q3volv" path="res://scripts/coin.gd" id="1_i64fm"]
-[ext_resource type="Texture2D" uid="uid://cd04pnw6oytl5" path="res://assets/brackeys_platformer_assets/brackeys_platformer_assets/sprites/coin.png" id="1_rwqht"]
-[ext_resource type="AudioStream" uid="uid://b3bhxeub16i86" path="res://assets/brackeys_platformer_assets/brackeys_platformer_assets/sounds/coin.wav" id="3_11l1o"]
+[ext_resource type="Texture2D" uid="uid://cd04pnw6oytl5" path="res://assets/brackeys_platformer_assets/sprites/coin.png" id="1_rwqht"]
+[ext_resource type="AudioStream" uid="uid://b3bhxeub16i86" path="res://assets/brackeys_platformer_assets/sounds/coin.wav" id="3_11l1o"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_i64fm"]
 atlas = ExtResource("1_rwqht")
@@ -198,6 +198,7 @@ _data = {
 }
 
 [node name="Coin" type="Area2D" unique_id=1556105122]
+collision_layer = 16
 collision_mask = 2
 script = ExtResource("1_i64fm")
 

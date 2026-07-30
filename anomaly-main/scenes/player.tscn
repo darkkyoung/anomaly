@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bvlspeh4o0r7a"]
 
 [ext_resource type="Texture2D" uid="uid://x3y5pcfoigo4" path="res://assets/brackeys_platformer_assets/sprites/Choroki 3.png" id="1_3vyb7"]
+[ext_resource type="Script" uid="uid://j4838v1n20ud" path="res://scripts/Cha_Health.gd" id="2_g2els"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_g2els"]
 atlas = ExtResource("1_3vyb7")
@@ -188,8 +189,9 @@ animations = [{
 "speed": 10.0
 }]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_4kxuq"]
-radius = 5.0
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_g2els"]
+radius = 4.0
+height = 20.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4kxuq"]
 size = Vector2(38, 13)
@@ -197,6 +199,7 @@ size = Vector2(38, 13)
 [node name="Player" type="CharacterBody2D" unique_id=966287071]
 z_index = 5
 collision_layer = 2
+collision_mask = 27
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=322828038]
 scale = Vector2(0.4, 0.4)
@@ -204,11 +207,15 @@ sprite_frames = SubResource("SpriteFrames_mti6b")
 animation = &"run"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1928128620]
-position = Vector2(0, 7)
-shape = SubResource("CircleShape2D_4kxuq")
+position = Vector2(0, 2)
+shape = SubResource("CapsuleShape2D_g2els")
 
 [node name="AttackArea" type="Area2D" parent="." unique_id=964869190]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackArea" unique_id=1476207525]
 position = Vector2(19, 0.5)
 shape = SubResource("RectangleShape2D_4kxuq")
+
+[node name="Health" type="Node2D" parent="." unique_id=442749613]
+script = ExtResource("2_g2els")
+post_death_action = 1

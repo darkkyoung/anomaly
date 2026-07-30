@@ -1,3 +1,4 @@
+class_name Player
 extends CharacterBody2D
 
 @onready var animated_sprite = $AnimatedSprite2D
@@ -13,8 +14,10 @@ var already_hit_enemies: Array = []
 
 const SPEED = 150.0
 const JUMP_VELOCITY = -300.0
+var PUSHPOWER = 30
 
 func _ready() -> void:
+	add_to_group("player")
 	attack_area.monitoring = false
 	attack_shape.disabled = true	
 
@@ -40,7 +43,6 @@ func _physics_process(delta: float) -> void:
 
 	# Get the input direction: -1, 0, 1
 	var direction := Input.get_axis("move_left", "move_right")
-	
 	# Flip the sprite
 	if direction > 0:
 		animated_sprite.flip_h = false
@@ -55,13 +57,17 @@ func _physics_process(delta: float) -> void:
 			animated_sprite.play("run")
 	else:
 		animated_sprite.play("jump")
-	
 	if direction:
 		velocity.x = direction * SPEED
 	else:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
-
 	move_and_slide()
+	
+	#Push objects
+	for i in get_slide_collision_count():
+		var collider = get_slide_collision(i)
+		if collider.get_collider() is RigidBody2D:
+			collider.get_collider().apply_central_impulse(-collider.get_normal() * PUSHPOWER)
 
 func attack(attack_direction: Vector2) -> void:
 	is_attacking = true
