@@ -1,6 +1,31 @@
 [gd_scene format=3 uid="uid://bvlspeh4o0r7a"]
 
 [ext_resource type="Texture2D" uid="uid://x3y5pcfoigo4" path="res://assets/brackeys_platformer_assets/sprites/Choroki 3.png" id="1_3vyb7"]
+[ext_resource type="Texture2D" uid="uid://fq7dbuft0km2" path="res://assets/brackeys_platformer_assets/sprites/일반 공격 업스케일 - 복사본.png" id="1_g2els"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ujl30"]
+atlas = ExtResource("1_g2els")
+region = Rect2(0, 0, 90, 179)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_31cv2"]
+atlas = ExtResource("1_g2els")
+region = Rect2(90, 0, 90, 179)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pf23h"]
+atlas = ExtResource("1_g2els")
+region = Rect2(180, 0, 90, 179)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dt7fs"]
+atlas = ExtResource("1_g2els")
+region = Rect2(270, 0, 90, 179)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wqfne"]
+atlas = ExtResource("1_g2els")
+region = Rect2(360, 0, 90, 179)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wnwbv"]
+atlas = ExtResource("1_g2els")
+region = Rect2(450, 0, 90, 179)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_g2els"]
 atlas = ExtResource("1_3vyb7")
@@ -102,6 +127,29 @@ region = Rect2(560, 140, 80, 70)
 animations = [{
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_ujl30")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_31cv2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pf23h")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dt7fs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wqfne")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wnwbv")
+}],
+"loop": 1,
+"name": &"attack1",
+"speed": 15.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_g2els")
 }, {
 "duration": 1.0,
@@ -192,7 +240,7 @@ animations = [{
 radius = 5.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4kxuq"]
-size = Vector2(38, 13)
+size = Vector2(22, 13)
 
 [node name="Player" type="CharacterBody2D" unique_id=966287071]
 z_index = 5
@@ -201,7 +249,7 @@ collision_layer = 2
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=322828038]
 scale = Vector2(0.4, 0.4)
 sprite_frames = SubResource("SpriteFrames_mti6b")
-animation = &"run"
+animation = &"attack1"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1928128620]
 position = Vector2(0, 7)
@@ -210,5 +258,5 @@ shape = SubResource("CircleShape2D_4kxuq")
 [node name="AttackArea" type="Area2D" parent="." unique_id=964869190]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackArea" unique_id=1476207525]
-position = Vector2(19, 0.5)
+position = Vector2(11, 0.5)
 shape = SubResource("RectangleShape2D_4kxuq")

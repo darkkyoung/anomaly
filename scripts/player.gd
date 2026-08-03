@@ -5,18 +5,29 @@ extends CharacterBody2D
 @onready var attack_area = $AttackArea
 @onready var attack_shape = $AttackArea/CollisionShape2D
 
+@onready var player_hp_bar: ProgressBar = $"../UI/PlayerHPBar"
+
 const ATTACK_DAMAGE = 1
-const ATTACK_TIME = 0.12
+const ATTACK_TIME = 0.5
 
 var is_attacking: bool = false
 var already_hit_enemies: Array = []
+var facing_direction: int = 1
+var attack_has_hit: bool = false
+
+const MAX_HP = 20
+var hp: int = MAX_HP
 
 const SPEED = 150.0
 const JUMP_VELOCITY = -300.0
 
 func _ready() -> void:
 	attack_area.monitoring = false
-	attack_shape.disabled = true	
+	attack_shape.disabled = true
+	
+	player_hp_bar.min_value = 0
+	player_hp_bar.max_value = MAX_HP
+	player_hp_bar.value = hp
 
 func _physics_process(delta: float) -> void:
 	# Add the gravity.
@@ -30,8 +41,10 @@ func _physics_process(delta: float) -> void:
 	# Attack
 	if not is_attacking:
 		if Input.is_action_just_pressed("attack_left"):
+			facing_direction = -1
 			attack(Vector2.LEFT)
 		elif Input.is_action_just_pressed("attack_right"):
+			facing_direction = 1
 			attack(Vector2.RIGHT)
 		elif Input.is_action_just_pressed("attack_up"):
 			attack(Vector2.UP)
@@ -42,21 +55,33 @@ func _physics_process(delta: float) -> void:
 	var direction := Input.get_axis("move_left", "move_right")
 	
 	# Flip the sprite
-	if direction > 0:
-		animated_sprite.flip_h = false
-	elif direction < 0:
-		animated_sprite.flip_h = true
+	if not is_attacking:
+		if direction > 0:
+			facing_direction = 1
+			animated_sprite.flip_h = false
+		elif direction < 0:
+			facing_direction = -1
+			animated_sprite.flip_h = true
 		
 	# Play Animation
-	if is_on_floor():
-		if direction == 0:
-			animated_sprite.play("idle")
+	if not is_attacking:
+		if is_on_floor():
+			if direction == 0:
+				animated_sprite.play("idle")
+			else:
+				animated_sprite.play("run")
 		else:
-			animated_sprite.play("run")
-	else:
-		animated_sprite.play("jump")
-	
-	if direction:
+			animated_sprite.play("jump")
+
+	# Attack hit timing
+	if is_attacking and animated_sprite.animation == "attack1":
+		if animated_sprite.frame == 3 and not attack_has_hit:
+			apply_attack_damage()
+			attack_has_hit = true
+
+	if is_attacking:
+		velocity.x = move_toward(velocity.x, 0, SPEED)
+	elif direction:
 		velocity.x = direction * SPEED
 	else:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
@@ -65,11 +90,23 @@ func _physics_process(delta: float) -> void:
 
 func attack(attack_direction: Vector2) -> void:
 	is_attacking = true
+	attack_has_hit = false
 	already_hit_enemies.clear()
+
+	if attack_direction == Vector2.LEFT:
+		facing_direction = -1
+		animated_sprite.flip_h = true
+		animated_sprite.play("attack1")
+	elif attack_direction == Vector2.RIGHT:
+		facing_direction = 1
+		animated_sprite.flip_h = false
+		animated_sprite.play("attack1")
+	else:
+		animated_sprite.play("attack1")
 
 	update_attack_area_position(attack_direction)
 
-	attack_area.monitoring = true
+	attack_area.monitoring = false
 	attack_shape.disabled = false
 
 	await get_tree().physics_frame
@@ -98,6 +135,33 @@ func attack(attack_direction: Vector2) -> void:
 	attack_shape.disabled = true
 	is_attacking = false
 
+func apply_attack_damage() -> void:
+	attack_area.monitoring = true
+	attack_shape.disabled = false
+
+	await get_tree().physics_frame
+
+	for area in attack_area.get_overlapping_areas():
+		var enemy = area.get_parent()
+
+		if enemy == null:
+			continue
+
+		if already_hit_enemies.has(enemy):
+			continue
+
+		if enemy.has_method("take_damage"):
+			var knockback_direction = sign(enemy.global_position.x - global_position.x)
+
+			if knockback_direction == 0:
+				knockback_direction = facing_direction
+
+			enemy.take_damage(ATTACK_DAMAGE, knockback_direction, 180.0)
+			already_hit_enemies.append(enemy)
+
+	attack_area.monitoring = false
+	attack_shape.disabled = true
+
 func update_attack_area_position(attack_direction: Vector2) -> void:
 	var attack_distance = 28
 
@@ -109,3 +173,23 @@ func update_attack_area_position(attack_direction: Vector2) -> void:
 		attack_area.position = Vector2(0, -attack_distance)
 	elif attack_direction == Vector2.DOWN:
 		attack_area.position = Vector2(0, attack_distance)
+
+func _on_animated_sprite_2d_animation_finished() -> void:
+	if animated_sprite.animation == "attack1":
+		is_attacking = false
+		attack_has_hit = false
+		attack_area.monitoring = false
+		attack_shape.disabled = true
+		animated_sprite.play("idle")
+
+func take_damage(amount: int) -> void:
+	hp -= amount
+	hp = max(hp, 0)
+	player_hp_bar.value = hp
+	
+	if hp <= 0:
+		die()
+
+func die() -> void:
+	print("Player died")
+	get_tree().reload_current_scene()

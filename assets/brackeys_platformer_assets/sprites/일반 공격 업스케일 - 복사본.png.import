@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bcv35cp0pmlg7"
-path="res://.godot/imported/Choroki 1.png-5b1c67803782bab7e26fff7cfd7d2255.ctex"
+uid="uid://fq7dbuft0km2"
+path="res://.godot/imported/일반 공격 업스케일 - 복사본.png-718d67bb9e4fb597f6af16ec2f624685.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/brackeys_platformer_assets/sprites/Choroki 1.png"
-dest_files=["res://.godot/imported/Choroki 1.png-5b1c67803782bab7e26fff7cfd7d2255.ctex"]
+source_file="res://assets/brackeys_platformer_assets/sprites/일반 공격 업스케일 - 복사본.png"
+dest_files=["res://.godot/imported/일반 공격 업스케일 - 복사본.png-718d67bb9e4fb597f6af16ec2f624685.ctex"]
 
 [params]
 
