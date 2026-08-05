@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://c4mx54b8f7nmt" path="res://scripts/killzone.gd" id="1_xlapc"]
 
 [node name="Killzone" type="Area2D" unique_id=820134560]
+collision_layer = 64
 collision_mask = 2
 script = ExtResource("1_xlapc")
 

@@ -326,9 +326,11 @@ text = "Space to jump"
 
 [node name="Slime" parent="Enemy" unique_id=1661787814 instance=ExtResource("7_u5sy4")]
 position = Vector2(72, 27)
+max_hp = null
 
 [node name="Slime2" parent="Enemy" unique_id=1215876439 instance=ExtResource("7_u5sy4")]
 position = Vector2(725, -18)
+max_hp = null
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=805540167]
 

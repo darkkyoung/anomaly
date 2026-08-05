@@ -14,14 +14,22 @@ var is_attacking: bool = false
 var already_hit_enemies: Array = []
 var facing_direction: int = 1
 var attack_has_hit: bool = false
+var is_dead: bool = false
 
-const MAX_HP = 20
+const MAX_HP: int = 20
+const INVINCIBLE_TIME: float = 0.8
+const PLAYER_KNOCKBACK_FRICTION: float = 900.0
+
 var hp: int = MAX_HP
+var is_invincible: bool = false
+var knockback_velocity: float = 0.0
 
-const SPEED = 150.0
+const SPEED = 125.0
 const JUMP_VELOCITY = -300.0
 
 func _ready() -> void:
+	add_to_group("player")
+
 	attack_area.monitoring = false
 	attack_shape.disabled = true
 	
@@ -79,12 +87,15 @@ func _physics_process(delta: float) -> void:
 			apply_attack_damage()
 			attack_has_hit = true
 
-	if is_attacking:
-		velocity.x = move_toward(velocity.x, 0, SPEED)
+	if abs(knockback_velocity) > 1.0:
+		velocity.x = knockback_velocity
+		knockback_velocity = move_toward(knockback_velocity, 0.0, PLAYER_KNOCKBACK_FRICTION * delta)
+	elif is_attacking:
+		velocity.x = move_toward(velocity.x, 0.0, SPEED)
 	elif direction:
 		velocity.x = direction * SPEED
 	else:
-		velocity.x = move_toward(velocity.x, 0, SPEED)
+		velocity.x = move_toward(velocity.x, 0.0, SPEED)
 
 	move_and_slide()
 
@@ -182,14 +193,42 @@ func _on_animated_sprite_2d_animation_finished() -> void:
 		attack_shape.disabled = true
 		animated_sprite.play("idle")
 
-func take_damage(amount: int) -> void:
+func take_damage(amount: int, knockback_direction: int = 0, knockback_power: float = 260.0) -> void:
+	if hp <= 0:
+		return
+
+	if is_invincible:
+		return
+
 	hp -= amount
 	hp = max(hp, 0)
 	player_hp_bar.value = hp
-	
+
+	print("Player HP: ", hp, "/", MAX_HP)
+
+	if knockback_direction != 0:
+		knockback_velocity = knockback_direction * 0.5 * knockback_power
+		velocity.y = min(velocity.y, -120.0)
+
 	if hp <= 0:
 		die()
+		return
+
+	start_invincibility()
+
+func start_invincibility() -> void:
+	is_invincible = true
+	animated_sprite.modulate = Color(1.0, 0.5, 0.5, 1.0)
+
+	await get_tree().create_timer(INVINCIBLE_TIME).timeout
+
+	is_invincible = false
+	animated_sprite.modulate = Color(1.0, 1.0, 1.0, 1.0)
 
 func die() -> void:
+	if is_dead:
+		return
+
+	is_dead = true
 	print("Player died")
 	get_tree().reload_current_scene()

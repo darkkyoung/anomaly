@@ -73,12 +73,16 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4kxuq"]
-size = Vector2(14, 13.5)
+size = Vector2(16, 17.5)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3vyb7"]
-size = Vector2(14, 14)
+size = Vector2(14, 15)
 
-[node name="Slime" type="Node2D" unique_id=1661787814]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_n6pvg"]
+size = Vector2(16, 15)
+
+[node name="Slime" type="CharacterBody2D" unique_id=220699239]
+collision_layer = 4
 script = ExtResource("1_n6pvg")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1253027970]
@@ -86,11 +90,21 @@ sprite_frames = SubResource("SpriteFrames_4kxuq")
 animation = &"slime_hit"
 autoplay = "default"
 
-[node name="Killzone" parent="." unique_id=820134560 instance=ExtResource("2_n6pvg")]
+[node name="PlayerDamageArea" parent="." unique_id=820134560 instance=ExtResource("2_n6pvg")]
+collision_layer = 16
+script = null
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Killzone" unique_id=539744361]
-position = Vector2(0, 4.75)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PlayerDamageArea" unique_id=539744361]
+position = Vector2(0, 2.75)
 shape = SubResource("RectangleShape2D_4kxuq")
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=179307981]
+collision_layer = 4
+collision_mask = 8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=686097338]
+position = Vector2(0, 1.5)
+shape = SubResource("RectangleShape2D_3vyb7")
 
 [node name="RayCastRight" type="RayCast2D" parent="." unique_id=1748321256]
 position = Vector2(0, 6)
@@ -100,8 +114,9 @@ target_position = Vector2(14, 0)
 position = Vector2(0, 6)
 target_position = Vector2(-14, 0)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=179307981]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=217627231]
+position = Vector2(0, 1.5)
+shape = SubResource("RectangleShape2D_n6pvg")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=686097338]
-position = Vector2(0, 5)
-shape = SubResource("RectangleShape2D_3vyb7")
+[connection signal="body_entered" from="PlayerDamageArea" to="." method="_on_player_damage_area_body_entered"]
+[connection signal="body_exited" from="PlayerDamageArea" to="." method="_on_player_damage_area_body_exited"]
