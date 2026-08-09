@@ -193,7 +193,12 @@ func _on_animated_sprite_2d_animation_finished() -> void:
 		attack_shape.disabled = true
 		animated_sprite.play("idle")
 
-func take_damage(amount: int, knockback_direction: int = 0, knockback_power: float = 260.0) -> void:
+func take_damage(
+	amount: int,
+	knockback_direction: int = 0,
+	knockback_power: float = 260.0,
+	launch_power: float = 120.0
+) -> void:
 	if hp <= 0:
 		return
 
@@ -208,7 +213,7 @@ func take_damage(amount: int, knockback_direction: int = 0, knockback_power: flo
 
 	if knockback_direction != 0:
 		knockback_velocity = knockback_direction * 0.5 * knockback_power
-		velocity.y = min(velocity.y, -120.0)
+		velocity.y = min(velocity.y, -launch_power)
 
 	if hp <= 0:
 		die()
