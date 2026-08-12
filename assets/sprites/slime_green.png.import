@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://x3y5pcfoigo4"
-path="res://.godot/imported/Choroki 3.png-ebec6eaebc0b1490692a1440526fbe91.ctex"
+uid="uid://bkaw0d77ke1m7"
+path="res://.godot/imported/slime_green.png-f6349164bf3a0f5189bb927b97af9c58.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/brackeys_platformer_assets/sprites/Choroki 3.png"
-dest_files=["res://.godot/imported/Choroki 3.png-ebec6eaebc0b1490692a1440526fbe91.ctex"]
+source_file="res://assets/sprites/slime_green.png"
+dest_files=["res://.godot/imported/slime_green.png-f6349164bf3a0f5189bb927b97af9c58.ctex"]
 
 [params]
 

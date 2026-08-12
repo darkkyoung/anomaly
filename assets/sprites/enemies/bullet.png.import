@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bkaw0d77ke1m7"
-path="res://.godot/imported/slime_green.png-7537a22022111bb8764aa544858b4d35.ctex"
+uid="uid://bxedmx3ydbh57"
+path="res://.godot/imported/bullet.png-85fe7474921865e2726305518a47de7b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/brackeys_platformer_assets/sprites/slime_green.png"
-dest_files=["res://.godot/imported/slime_green.png-7537a22022111bb8764aa544858b4d35.ctex"]
+source_file="res://assets/sprites/enemies/bullet.png"
+dest_files=["res://.godot/imported/bullet.png-85fe7474921865e2726305518a47de7b.ctex"]
 
 [params]
 

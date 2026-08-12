@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dbrn82sf0yky2"
-path="res://.godot/imported/enemy1_attack.png-bd081e00739aad88416650910497932c.ctex"
+uid="uid://fq7dbuft0km2"
+path="res://.godot/imported/일반 공격 업스케일 - 복사본.png-76ca2f9f99c7a04acfa7eee43b29e32d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/enemies/enemy1_attack.png"
-dest_files=["res://.godot/imported/enemy1_attack.png-bd081e00739aad88416650910497932c.ctex"]
+source_file="res://assets/sprites/player/일반 공격 업스케일 - 복사본.png"
+dest_files=["res://.godot/imported/일반 공격 업스케일 - 복사본.png-76ca2f9f99c7a04acfa7eee43b29e32d.ctex"]
 
 [params]
 

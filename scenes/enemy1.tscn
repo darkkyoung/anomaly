@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://diykjpm1r4y14"]
 
 [ext_resource type="Script" uid="uid://b021vcnx7kmug" path="res://scripts/enemy1.gd" id="1_n665k"]
-[ext_resource type="Texture2D" uid="uid://mh5ukux00no6" path="res://assets/enemies/enemy1.png" id="2_iolyx"]
-[ext_resource type="Texture2D" uid="uid://dbrn82sf0yky2" path="res://assets/enemies/enemy1_attack.png" id="2_lowyn"]
-[ext_resource type="Texture2D" uid="uid://yq4xkaj66i36" path="res://assets/enemies/enemy1_dash.png" id="2_ncnv8"]
+[ext_resource type="Texture2D" uid="uid://mh5ukux00no6" path="res://assets/sprites/enemies/enemy1.png" id="2_iolyx"]
+[ext_resource type="Texture2D" uid="uid://dbrn82sf0yky2" path="res://assets/sprites/enemies/enemy1_attack.png" id="2_lowyn"]
+[ext_resource type="Texture2D" uid="uid://yq4xkaj66i36" path="res://assets/sprites/enemies/enemy1_dash.png" id="2_ncnv8"]
 [ext_resource type="PackedScene" uid="uid://crxqvo3cr0ptm" path="res://scenes/killzone.tscn" id="3_iolyx"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tmbj3"]
@@ -15,7 +15,6 @@ atlas = ExtResource("2_ncnv8")
 region = Rect2(0, 0, 1536, 1024)
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_l0xj3"]
-load_path = "res://.godot/imported/enemy1_walk.png-0d21eddb2c6c39ae084f9e1365a7df5d.ctex"
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_iolyx"]
 atlas = SubResource("CompressedTexture2D_l0xj3")

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bvlspeh4o0r7a"]
 
-[ext_resource type="Texture2D" uid="uid://x3y5pcfoigo4" path="res://assets/brackeys_platformer_assets/sprites/Choroki 3.png" id="1_3vyb7"]
-[ext_resource type="Texture2D" uid="uid://fq7dbuft0km2" path="res://assets/brackeys_platformer_assets/sprites/일반 공격 업스케일 - 복사본.png" id="1_g2els"]
+[ext_resource type="Texture2D" uid="uid://x3y5pcfoigo4" path="res://assets/sprites/player/Choroki 3.png" id="1_3vyb7"]
+[ext_resource type="Texture2D" uid="uid://fq7dbuft0km2" path="res://assets/sprites/player/일반 공격 업스케일 - 복사본.png" id="1_g2els"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ujl30"]
 atlas = ExtResource("1_g2els")
