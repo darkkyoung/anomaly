@@ -10,6 +10,7 @@ const LIFE_TIME: float = 2.0
 const PLAYER_HIT_RADIUS: float = 18.0
 
 var direction: int = 1
+var travel_direction: Vector2 = Vector2.RIGHT
 var target_player: Node2D = null
 var has_hit: bool = false
 
@@ -19,10 +20,8 @@ func _ready() -> void:
 	monitoring = true
 	monitorable = true
 
-	# 충돌 레이어/마스크가 꼬였을 가능성을 줄이기 위해 코드에서 강제 설정
-	# Layer 4 = 적 탄환
-	# Mask 전체 = 일단 다 감지하고, 코드에서 player/enemy/world를 구분
-	collision_layer = 8
+	# Layer 5 = EnemyAttack
+	collision_layer = 16
 	collision_mask = 0xFFFFFFFF
 
 	if not body_entered.is_connected(_on_body_entered):
@@ -42,21 +41,28 @@ func _physics_process(delta: float) -> void:
 	if has_hit:
 		return
 
-	global_position.x += direction * SPEED * delta
+	global_position += travel_direction * SPEED * delta
 
 	check_player_by_distance()
 
 
-func setup(new_direction: int, new_target_player: Node = null) -> void:
-	direction = new_direction
+func setup(new_travel_direction: Vector2, new_target_player: Node = null) -> void:
+	if new_travel_direction.length_squared() > 0.001:
+		travel_direction = new_travel_direction.normalized()
+	else:
+		travel_direction = Vector2.RIGHT
+
+	# 플레이어 피격 시 좌우 넉백 방향
+	if travel_direction.x < 0.0:
+		direction = -1
+	else:
+		direction = 1
 
 	if new_target_player is Node2D:
 		target_player = new_target_player
 
-	if direction < 0:
-		scale.x = -abs(scale.x)
-	else:
-		scale.x = abs(scale.x)
+	# bullet.png가 기본적으로 오른쪽을 바라본다고 가정
+	rotation = travel_direction.angle()
 
 
 func check_player_by_distance() -> void:

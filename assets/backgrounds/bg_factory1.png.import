@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bgo25o0vxwhdc"
-path="res://.godot/imported/steampunk_ground_tiles.png.png-161d400dbfc51671066bf8ef6874097e.ctex"
+uid="uid://cgcr6llppijcq"
+path="res://.godot/imported/bg_factory1.png-809933810a489e0319677f58fde586b7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/tilesets/steampunk_ground_tiles.png.png"
-dest_files=["res://.godot/imported/steampunk_ground_tiles.png.png-161d400dbfc51671066bf8ef6874097e.ctex"]
+source_file="res://assets/backgrounds/bg_factory1.png"
+dest_files=["res://.godot/imported/bg_factory1.png-809933810a489e0319677f58fde586b7.ctex"]
 
 [params]
 

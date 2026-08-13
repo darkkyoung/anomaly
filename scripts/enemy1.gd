@@ -10,11 +10,11 @@ const ATTACK_COOLDOWN: float = 0.8
 const ATTACK_PAUSE_TIME: float = 0.25
 const PLAYER_KNOCKBACK_POWER: float = 280.0
 
-const MELEE_RANGE_X: float = 35.0
+const MELEE_RANGE_X: float = 28.0
 const MELEE_RANGE_Y: float = 28.0
 
 const MELEE_RANGE: float = 35.0
-const DASH_RANGE: float = 130.0
+const DASH_RANGE: float = 150.0
 
 const DASH_SPEED: float = 200.0
 const DASH_CHARGE_TIME: float = 0.25

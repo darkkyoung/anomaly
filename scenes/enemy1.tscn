@@ -12,7 +12,7 @@ region = Rect2(0, 0, 1536, 1024)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_l0xj3"]
 atlas = ExtResource("2_ncnv8")
-region = Rect2(0, 0, 1536, 1024)
+region = Rect2(0, 0, 1400, 1024)
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_l0xj3"]
 
@@ -84,7 +84,7 @@ animations = [{
 size = Vector2(14, 18)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4kxuq"]
-size = Vector2(25.75, 20.75)
+size = Vector2(30.75, 20.75)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3vyb7"]
 size = Vector2(16, 22)
@@ -108,7 +108,7 @@ collision_layer = 16
 script = null
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PlayerDamageArea" unique_id=539744361]
-position = Vector2(4.125, -0.375)
+position = Vector2(6.625, -0.375)
 shape = SubResource("RectangleShape2D_4kxuq")
 
 [node name="Hurtbox" type="Area2D" parent="." unique_id=179307981]
