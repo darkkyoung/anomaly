@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://cqojegkawgmja"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_v4t87"]
+load_path = "res://.godot/imported/steampunk_platforms.png-3810481085ee765332d8703f7a3afaba.ctex"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4kxuq"]
+size = Vector2(32, 8)
+
+[node name="Platform" type="AnimatableBody2D" unique_id=132714494]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1250494167]
+position = Vector2(-0.03772831, -1.61875)
+scale = Vector2(0.023915527, 0.023915527)
+texture = SubResource("CompressedTexture2D_v4t87")
+region_enabled = true
+region_rect = Rect2(90.68384, 76.75, 1358.94, 219.69003)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1443867778]
+shape = SubResource("RectangleShape2D_4kxuq")
+one_way_collision = true
