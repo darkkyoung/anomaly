@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://bnpxlsehrjfb3"]
 
+[ext_resource type="Script" uid="uid://bnilt6vfvni7d" path="res://scripts/title_screen.gd" id="1_ascc0"]
 
 [node name="Title Screen" type="Control" unique_id=1564584635]
 layout_mode = 3
@@ -8,13 +9,20 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_ascc0")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=889084763]
-layout_mode = 0
-offset_left = 750.0
-offset_top = 588.0
-offset_right = 1163.0
-offset_bottom = 871.0
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -206.5
+offset_top = -283.0
+offset_right = 206.5
+grow_horizontal = 2
+grow_vertical = 0
 
 [node name="Start" type="Button" parent="VBoxContainer" unique_id=314610865]
 layout_mode = 2
