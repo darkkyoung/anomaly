@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://diykjpm1r4y14" path="res://scenes/enemy1.tscn" id="11_qo7hg"]
 [ext_resource type="PackedScene" uid="uid://b42rlsx6hqcgr" path="res://scenes/enemy2.tscn" id="12_odav0"]
 [ext_resource type="Texture2D" uid="uid://mf3mkpeq86bc" path="res://assets/backgrounds/factory_stage1_bg.png" id="13_3xffc"]
+[ext_resource type="PackedScene" uid="uid://bbrpuc13ql7g4" path="res://scenes/pause_menu.tscn" id="13_s4es8"]
 [ext_resource type="Texture2D" uid="uid://c06ssbu82q6jf" path="res://assets/backgrounds/bg_watchtower.png" id="14_icuov"]
 [ext_resource type="Texture2D" uid="uid://b0icvmliugcyf" path="res://assets/backgrounds/bg_crain.png" id="15_xnv6s"]
 [ext_resource type="Texture2D" uid="uid://cgcr6llppijcq" path="res://assets/backgrounds/bg_factory1.png" id="16_6lk74"]
@@ -426,6 +427,8 @@ max_value = 20.0
 step = 1.0
 value = 20.0
 show_percentage = false
+
+[node name="Pause_menu" parent="UI" unique_id=1247716696 instance=ExtResource("13_s4es8")]
 
 [node name="Background" type="Node2D" parent="." unique_id=117131350]
 

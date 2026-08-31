@@ -22,8 +22,7 @@ GlobalInput="*uid://ct5hqg85nre1k"
 
 [display]
 
-window/size/viewport_width=1920
-window/size/viewport_height=1080
+window/size/mode=3
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
@@ -80,6 +79,7 @@ pause={
 2d_physics/layer_5="EnemyAttack"
 2d_physics/layer_6="Item"
 2d_physics/layer_7="Trigger"
+2d_physics/layer_8="Pushable"
 
 [physics]
 
