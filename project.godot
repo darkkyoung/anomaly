@@ -11,13 +11,14 @@ config_version=5
 [application]
 
 config/name="anomaly"
-run/main_scene="uid://b478s4bqk8qhc"
+run/main_scene="uid://bnpxlsehrjfb3"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
 Music="*uid://dw3e0jq005qut"
+GlobalInput="*uid://ct5hqg85nre1k"
 
 [display]
 
