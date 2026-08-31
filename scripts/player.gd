@@ -27,6 +27,9 @@ var knockback_velocity: float = 0.0
 const SPEED = 125.0
 const JUMP_VELOCITY = -300.0
 
+const STOMP_DAMAGE: int = 1
+const STOMP_BOUNCE_VELOCITY: float = -220.0
+
 func _ready() -> void:
 	add_to_group("player")
 
@@ -97,7 +100,55 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, SPEED)
 
+	var fall_speed_before_move: float = velocity.y
+
 	move_and_slide()
+
+	check_stomp_collisions(fall_speed_before_move)
+
+func check_stomp_collisions(fall_speed_before_move: float) -> void:
+	# 위로 올라가는 중이거나 정지 상태면 밟기 판정 없음
+	if fall_speed_before_move <= 0.0:
+		return
+
+	for i in range(get_slide_collision_count()):
+		var collision := get_slide_collision(i)
+
+		if collision == null:
+			continue
+
+		var collider := collision.get_collider()
+
+		if collider == null:
+			continue
+
+		if not collider.is_in_group("enemy"):
+			continue
+
+		if not collider.has_method("take_damage"):
+			continue
+
+		var normal := collision.get_normal()
+
+		# 적의 윗면에 닿은 경우만 인정
+		if normal.y > -0.5:
+			continue
+
+		# 플레이어가 실제로 적보다 위에 있는지도 한 번 더 확인
+		if global_position.y >= collider.global_position.y:
+			continue
+
+		collider.take_damage(
+			STOMP_DAMAGE,
+			0,
+			0.0
+		)
+
+		velocity.y = STOMP_BOUNCE_VELOCITY
+
+		print("STOMP: ", collider.name)
+
+		break
 
 func attack(attack_direction: Vector2) -> void:
 	is_attacking = true
