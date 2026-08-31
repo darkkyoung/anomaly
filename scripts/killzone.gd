@@ -3,10 +3,14 @@ extends Area2D
 @onready var timer = $Timer
 
 func _on_body_entered(body: Node2D) -> void:
-	print("You Died!")
-	Engine.time_scale = 0.5
-	body.get_node("CollisionShape2D").queue_free()
-	timer.start()
+	if body == null:
+		return
+
+	if not body.is_in_group("player"):
+		return
+
+	if body.has_method("die"):
+		body.die()
 
 
 func _on_timer_timeout() -> void:

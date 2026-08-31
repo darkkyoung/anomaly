@@ -10,25 +10,35 @@ extends CharacterBody2D
 const ATTACK_DAMAGE = 1
 const ATTACK_TIME = 0.5
 
+const LADDER_SPEED: float = 85.0
+const LADDER_SNAP_SPEED: float = 180.0
+
+const DEATH_RESTART_DELAY: float = 0.6
+
+const MAX_HP: int = 20
+const INVINCIBLE_TIME: float = 0.8
+const PLAYER_KNOCKBACK_FRICTION: float = 900.0
+
+const SPEED = 125.0
+const JUMP_VELOCITY = -300.0
+
+const BOX_PUSH_SPEED: float = 55.0
+
+const STOMP_DAMAGE: int = 1
+const STOMP_BOUNCE_VELOCITY: float = -220.0
+
+var current_ladder: Area2D = null
+var is_climbing: bool = false
+
 var is_attacking: bool = false
 var already_hit_enemies: Array = []
 var facing_direction: int = 1
 var attack_has_hit: bool = false
 var is_dead: bool = false
 
-const MAX_HP: int = 20
-const INVINCIBLE_TIME: float = 0.8
-const PLAYER_KNOCKBACK_FRICTION: float = 900.0
-
 var hp: int = MAX_HP
 var is_invincible: bool = false
 var knockback_velocity: float = 0.0
-
-const SPEED = 125.0
-const JUMP_VELOCITY = -300.0
-
-const STOMP_DAMAGE: int = 1
-const STOMP_BOUNCE_VELOCITY: float = -220.0
 
 func _ready() -> void:
 	add_to_group("player")
@@ -41,6 +51,45 @@ func _ready() -> void:
 	player_hp_bar.value = hp
 
 func _physics_process(delta: float) -> void:
+	if is_dead:
+		velocity = Vector2.ZERO
+		return
+		
+	var climb_direction: float = Input.get_axis(
+		"climb_up",
+		"climb_down"
+	)
+
+	var ladder_available: bool = (
+		current_ladder != null
+		and is_instance_valid(current_ladder)
+	)
+
+	# 사다리 영역에서 위/아래 입력을 하면 사다리 타기 시작
+	if ladder_available and climb_direction != 0.0:
+		is_climbing = true
+
+	# 사다리를 벗어나면 일반 상태로 복귀
+	if not ladder_available:
+		is_climbing = false
+
+	# 사다리를 타는 동안에는 중력과 일반 이동을 처리하지 않음
+	if is_climbing:
+		velocity.y = climb_direction * LADDER_SPEED
+		velocity.x = 0.0
+
+		global_position.x = move_toward(
+			global_position.x,
+			current_ladder.global_position.x,
+			LADDER_SNAP_SPEED * delta
+		)
+
+		if not is_attacking:
+			animated_sprite.play("idle")
+
+		move_and_slide()
+		return
+
 	# Add the gravity.
 	if not is_on_floor():
 		velocity += get_gravity() * delta
@@ -104,7 +153,67 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
+	push_boxes(direction)
 	check_stomp_collisions(fall_speed_before_move)
+	
+func enter_ladder(ladder: Area2D) -> void:
+	current_ladder = ladder
+
+
+func exit_ladder(ladder: Area2D) -> void:
+	if current_ladder != ladder:
+		return
+
+	current_ladder = null
+	is_climbing = false
+
+func push_boxes(input_direction: float) -> void:
+	if input_direction == 0.0:
+		return
+
+	for i in range(get_slide_collision_count()):
+		var collision: KinematicCollision2D = get_slide_collision(i)
+
+		if collision == null:
+			continue
+
+		var collider: Object = collision.get_collider()
+
+		if collider == null:
+			continue
+
+		if not (collider is RigidBody2D):
+			continue
+
+		var box := collider as RigidBody2D
+
+		if not box.is_in_group("pushable"):
+			continue
+
+		var normal: Vector2 = collision.get_normal()
+
+		# 박스 윗면/아랫면이 아니라 좌우 면에 부딪쳤을 때만
+		if abs(normal.x) < 0.7:
+			continue
+
+		var push_direction: float
+
+		if input_direction > 0.0:
+			push_direction = 1.0
+		else:
+			push_direction = -1.0
+
+		# 플레이어가 실제로 박스 방향으로 밀고 있는지 검사
+		if push_direction > 0.0 and normal.x >= 0.0:
+			continue
+
+		if push_direction < 0.0 and normal.x <= 0.0:
+			continue
+
+		box.sleeping = false
+		box.linear_velocity.x = push_direction * BOX_PUSH_SPEED
+
+		print("PUSH BOX: ", box.name)
 
 func check_stomp_collisions(fall_speed_before_move: float) -> void:
 	# 위로 올라가는 중이거나 정지 상태면 밟기 판정 없음
@@ -148,7 +257,7 @@ func check_stomp_collisions(fall_speed_before_move: float) -> void:
 
 		print("STOMP: ", collider.name)
 
-		break
+		break;
 
 func attack(attack_direction: Vector2) -> void:
 	is_attacking = true
@@ -286,5 +395,17 @@ func die() -> void:
 		return
 
 	is_dead = true
+	hp = 0
+	player_hp_bar.value = hp
+
+	velocity = Vector2.ZERO
+	knockback_velocity = 0.0
+
 	print("Player died")
+
+	await get_tree().create_timer(DEATH_RESTART_DELAY).timeout
+
+	if not is_inside_tree():
+		return
+
 	get_tree().reload_current_scene()
