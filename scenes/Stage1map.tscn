@@ -1,0 +1,155 @@
+[gd_scene format=3 uid="uid://bwtl3frx8fpa2"]
+
+[ext_resource type="Script" uid="uid://eftpslw4w467" path="res://scripts/levelselect.gd" id="1_kjv3s"]
+
+[node name="Stage1map" type="Node2D" unique_id=574054955]
+script = ExtResource("1_kjv3s")
+
+[node name="Label" type="Label" parent="." unique_id=110478811]
+offset_left = 860.0
+offset_top = 232.0
+offset_right = 953.0
+offset_bottom = 255.0
+text = "Stage Select"
+
+[node name="background" type="Sprite2D" parent="." unique_id=545829345]
+
+[node name="level_1_1" type="Control" parent="." unique_id=1462098079]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="Select" type="Button" parent="level_1_1" unique_id=907117587]
+layout_mode = 0
+offset_left = 755.0
+offset_top = 450.0
+offset_right = 785.0
+offset_bottom = 480.0
+
+[node name="on" type="Sprite2D" parent="level_1_1" unique_id=729110507]
+position = Vector2(755, 450)
+
+[node name="locked" type="ColorRect" parent="level_1_1" unique_id=1497011750]
+layout_mode = 0
+offset_left = 750.0
+offset_top = 445.0
+offset_right = 790.0
+offset_bottom = 485.0
+color = Color(0, 0, 0, 0.47058824)
+
+[node name="clear" type="ColorRect" parent="level_1_1" unique_id=479028456]
+layout_mode = 0
+offset_left = 750.0
+offset_top = 445.0
+offset_right = 790.0
+offset_bottom = 485.0
+color = Color(1, 0.78431374, 0.29411766, 0.47058824)
+
+[node name="level_1_2" type="Control" parent="." unique_id=2037626359]
+layout_mode = 3
+anchors_preset = 0
+offset_left = -135.0
+offset_top = 59.0
+offset_right = -135.0
+offset_bottom = 59.0
+
+[node name="Select" type="Button" parent="level_1_2" unique_id=1208832516]
+layout_mode = 0
+offset_left = 886.0
+offset_top = 498.0
+offset_right = 916.0
+offset_bottom = 528.0
+
+[node name="on" type="Sprite2D" parent="level_1_2" unique_id=1126874144]
+position = Vector2(886, 498)
+
+[node name="locked" type="ColorRect" parent="level_1_2" unique_id=1299485441]
+layout_mode = 0
+offset_left = 881.0
+offset_top = 492.0
+offset_right = 921.0
+offset_bottom = 532.0
+color = Color(0, 0, 0, 0.47058824)
+
+[node name="clear" type="ColorRect" parent="level_1_2" unique_id=1002613441]
+layout_mode = 0
+offset_left = 881.0
+offset_top = 492.0
+offset_right = 921.0
+offset_bottom = 532.0
+color = Color(1, 0.78431374, 0.29411766, 0.47058824)
+
+[node name="level_1_3" type="Control" parent="." unique_id=800534649]
+layout_mode = 3
+anchors_preset = 0
+offset_left = -127.0
+offset_top = 137.0
+offset_right = -127.0
+offset_bottom = 137.0
+
+[node name="Select" type="Button" parent="level_1_3" unique_id=611328818]
+layout_mode = 0
+offset_left = 886.0
+offset_top = 498.0
+offset_right = 916.0
+offset_bottom = 528.0
+
+[node name="on" type="Sprite2D" parent="level_1_3" unique_id=1747384671]
+position = Vector2(886, 498)
+
+[node name="locked" type="ColorRect" parent="level_1_3" unique_id=1078221021]
+layout_mode = 0
+offset_left = 881.0
+offset_top = 492.0
+offset_right = 921.0
+offset_bottom = 532.0
+color = Color(0, 0, 0, 0.47058824)
+
+[node name="clear" type="ColorRect" parent="level_1_3" unique_id=1199496563]
+layout_mode = 0
+offset_left = 881.0
+offset_top = 492.0
+offset_right = 921.0
+offset_bottom = 532.0
+color = Color(1, 0.78431374, 0.29411766, 0.47058824)
+
+[node name="level_1_4" type="Control" parent="." unique_id=2023088685]
+layout_mode = 3
+anchors_preset = 0
+offset_left = -130.0
+offset_top = 238.0
+offset_right = -130.0
+offset_bottom = 238.0
+
+[node name="Select" type="Button" parent="level_1_4" unique_id=1742419555]
+layout_mode = 0
+offset_left = 886.0
+offset_top = 498.0
+offset_right = 916.0
+offset_bottom = 528.0
+
+[node name="on" type="Sprite2D" parent="level_1_4" unique_id=340284623]
+position = Vector2(886, 498)
+
+[node name="locked" type="ColorRect" parent="level_1_4" unique_id=2103271897]
+layout_mode = 0
+offset_left = 881.0
+offset_top = 494.0
+offset_right = 921.0
+offset_bottom = 534.0
+color = Color(0, 0, 0, 0.47058824)
+
+[node name="clear" type="ColorRect" parent="level_1_4" unique_id=940204782]
+layout_mode = 0
+offset_left = 881.0
+offset_top = 494.0
+offset_right = 921.0
+offset_bottom = 534.0
+color = Color(1, 0.78431374, 0.29411766, 0.47058824)
+
+[node name="Line2D" type="Line2D" parent="." unique_id=1792591650]
+
+[connection signal="pressed" from="level_1_1/Select" to="." method="_on_level_1_pressed"]
+[connection signal="pressed" from="level_1_1/Select" to="." method="_on_level_1_1_pressed"]
+[connection signal="pressed" from="level_1_2/Select" to="." method="_on_level_1_2_pressed"]
+[connection signal="pressed" from="level_1_3/Select" to="." method="_on_level_1_3_pressed"]
+[connection signal="pressed" from="level_1_4/Select" to="." method="_on_level_1_4_pressed"]

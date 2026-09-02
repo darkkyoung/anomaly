@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://cn73c7ap6ksya"]
+
+[ext_resource type="Script" uid="uid://bmjlr4obcmjxs" path="res://scripts/enemy2_bullet.gd" id="1_mfwwy"]
+[ext_resource type="Texture2D" uid="uid://bxedmx3ydbh57" path="res://assets/sprites/enemies/bullet.png" id="2_skd6j"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mfwwy"]
+size = Vector2(16, 12)
+
+[node name="Enemy2Bullet" type="Area2D" unique_id=1005744915]
+collision_layer = 8
+collision_mask = 3
+script = ExtResource("1_mfwwy")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=653216225]
+position = Vector2(0, -4.7683716e-07)
+scale = Vector2(0.0810547, 0.081054695)
+texture = ExtResource("2_skd6j")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1849932456]
+shape = SubResource("RectangleShape2D_mfwwy")

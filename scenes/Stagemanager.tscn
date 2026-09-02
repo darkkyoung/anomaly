@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://dbe57g3awynsj"]
+
+[ext_resource type="PackedScene" uid="uid://bwtl3frx8fpa2" path="res://scenes/Stage1map.tscn" id="1_n65ci"]
+[ext_resource type="PackedScene" uid="uid://scj4xd360tfm" path="res://scenes/level2.tscn" id="2_v0oin"]
+[ext_resource type="PackedScene" uid="uid://co8j2hf5ht5kp" path="res://scenes/level3.tscn" id="3_g0xqj"]
+
+[node name="Stagemanager" type="Node2D" unique_id=1879586450]
+
+[node name="Stage1map" parent="." unique_id=574054955 instance=ExtResource("1_n65ci")]
+
+[node name="Level1" parent="Stage1map" unique_id=1248430715 instance=ExtResource("2_v0oin")]
+
+[node name="Level2" parent="Stage1map" unique_id=592031159 instance=ExtResource("2_v0oin")]
+
+[node name="Level3" parent="Stage1map" unique_id=1517442289 instance=ExtResource("3_g0xqj")]

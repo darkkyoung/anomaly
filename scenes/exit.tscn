@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://dt2wltrrdprsv"]
+
+[ext_resource type="Texture2D" uid="uid://brlptlb33yri8" path="res://assets/Structures/Door.png" id="1_l0aq0"]
+[ext_resource type="Script" uid="uid://b7ux1vmxbem7v" path="res://scripts/exit.gd" id="1_uyw7u"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_kie8b"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_l0aq0")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kie8b"]
+size = Vector2(22, 33)
+
+[node name="Exit" type="Area2D" unique_id=1189971192]
+collision_layer = 64
+collision_mask = 3
+script = ExtResource("1_uyw7u")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=529320614]
+scale = Vector2(0.069145925, 0.069145925)
+sprite_frames = SubResource("SpriteFrames_kie8b")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1018109971]
+position = Vector2(0, 7.5)
+shape = SubResource("RectangleShape2D_kie8b")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

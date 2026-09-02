@@ -1,0 +1,123 @@
+[gd_scene format=3 uid="uid://diykjpm1r4y14"]
+
+[ext_resource type="Script" uid="uid://b021vcnx7kmug" path="res://scripts/enemy1.gd" id="1_n665k"]
+[ext_resource type="Texture2D" uid="uid://mh5ukux00no6" path="res://assets/sprites/enemies/enemy1.png" id="2_iolyx"]
+[ext_resource type="Texture2D" uid="uid://dbrn82sf0yky2" path="res://assets/sprites/enemies/enemy1_attack.png" id="2_lowyn"]
+[ext_resource type="Texture2D" uid="uid://yq4xkaj66i36" path="res://assets/sprites/enemies/enemy1_dash.png" id="2_ncnv8"]
+[ext_resource type="PackedScene" uid="uid://crxqvo3cr0ptm" path="res://scenes/killzone.tscn" id="3_iolyx"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tmbj3"]
+atlas = ExtResource("2_lowyn")
+region = Rect2(0, 0, 1536, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l0xj3"]
+atlas = ExtResource("2_ncnv8")
+region = Rect2(0, 0, 1400, 1024)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_l0xj3"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_iolyx"]
+atlas = SubResource("CompressedTexture2D_l0xj3")
+region = Rect2(0, 0, 384, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ye30t"]
+atlas = SubResource("CompressedTexture2D_l0xj3")
+region = Rect2(384, 0, 384, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6f6wx"]
+atlas = SubResource("CompressedTexture2D_l0xj3")
+region = Rect2(768, 0, 384, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mu0b7"]
+atlas = SubResource("CompressedTexture2D_l0xj3")
+region = Rect2(1152, 0, 384, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ncnv8"]
+atlas = ExtResource("2_iolyx")
+region = Rect2(0, 0, 1536, 1024)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_4kxuq"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tmbj3")
+}],
+"loop": 1,
+"name": &"enemy1_attack",
+"speed": 7.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l0xj3")
+}],
+"loop": 1,
+"name": &"enemy1_dash",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_iolyx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ye30t")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6f6wx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mu0b7")
+}],
+"loop": 1,
+"name": &"enemy1_walk",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ncnv8")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 10.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_n6pvg"]
+size = Vector2(14, 18)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4kxuq"]
+size = Vector2(30.75, 20.75)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3vyb7"]
+size = Vector2(16, 22)
+
+[node name="Enemy1" type="CharacterBody2D" unique_id=220699239]
+collision_layer = 4
+script = ExtResource("1_n665k")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1253027970]
+position = Vector2(4.7683716e-07, -2.3841858e-07)
+scale = Vector2(0.035546876, 0.035546876)
+sprite_frames = SubResource("SpriteFrames_4kxuq")
+animation = &"enemy1_attack"
+autoplay = "idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=217627231]
+shape = SubResource("RectangleShape2D_n6pvg")
+
+[node name="PlayerDamageArea" parent="." unique_id=820134560 instance=ExtResource("3_iolyx")]
+collision_layer = 16
+script = null
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PlayerDamageArea" unique_id=539744361]
+position = Vector2(6.625, -0.375)
+shape = SubResource("RectangleShape2D_4kxuq")
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=179307981]
+collision_layer = 4
+collision_mask = 8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=686097338]
+position = Vector2(-1, 0)
+shape = SubResource("RectangleShape2D_3vyb7")
+
+[connection signal="body_entered" from="PlayerDamageArea" to="." method="_on_player_damage_area_body_entered"]
+[connection signal="body_exited" from="PlayerDamageArea" to="." method="_on_player_damage_area_body_exited"]

@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://dmpwyf6fqn7yp"]
+
+[ext_resource type="Script" uid="uid://vp23jpliwlbc" path="res://scripts/SceneTransition.gd" id="1_e0bkc"]
+
+[node name="SceneTransition" type="CanvasLayer" unique_id=1650030910]
+script = ExtResource("1_e0bkc")
+
+[node name="WipeRect" type="ColorRect" parent="." unique_id=2132776089]
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
