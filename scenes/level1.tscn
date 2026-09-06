@@ -11,10 +11,10 @@
 [ext_resource type="PackedScene" uid="uid://cqojegkawgmja" path="res://scenes/platform.tscn" id="9_msy1c"]
 [ext_resource type="FontFile" uid="uid://qeomp0sylakh" path="res://assets/fonts/PixelOperator8.ttf" id="10_7dkav"]
 [ext_resource type="PackedScene" uid="uid://diykjpm1r4y14" path="res://scenes/enemy1.tscn" id="11_4niyd"]
-[ext_resource type="PackedScene" uid="uid://b42rlsx6hqcgr" path="res://scenes/enemy2.tscn" id="12_3umqw"]
 [ext_resource type="PackedScene" uid="uid://uvcsg12bf0yl" path="res://scenes/ladder.tscn" id="13_1ooyw"]
 [ext_resource type="PackedScene" uid="uid://crhp2uulylfcw" path="res://scenes/Box.tscn" id="13_gqmnx"]
 [ext_resource type="PackedScene" uid="uid://bbrpuc13ql7g4" path="res://scenes/pause_menu.tscn" id="13_u068y"]
+[ext_resource type="Texture2D" uid="uid://ddcsqaiem2pcu" path="res://assets/sprites/ui/title_logo.png" id="14_ai3nx"]
 [ext_resource type="Texture2D" uid="uid://mf3mkpeq86bc" path="res://assets/backgrounds/factory_stage1_bg.png" id="14_p71k4"]
 [ext_resource type="Texture2D" uid="uid://c06ssbu82q6jf" path="res://assets/backgrounds/bg_watchtower.png" id="15_1oofn"]
 [ext_resource type="Texture2D" uid="uid://b0icvmliugcyf" path="res://assets/backgrounds/bg_crain.png" id="16_6i0tl"]
@@ -22,6 +22,7 @@
 [ext_resource type="Texture2D" uid="uid://bk6viw6nva4am" path="res://assets/backgrounds/bg_factory2.png" id="18_6xmqk"]
 [ext_resource type="Texture2D" uid="uid://btimjq3vxlqev" path="res://assets/backgrounds/bg_bg_factory1.png" id="19_hvrd6"]
 [ext_resource type="PackedScene" uid="uid://dt2wltrrdprsv" path="res://scenes/exit.tscn" id="20_3w4mx"]
+[ext_resource type="Script" uid="uid://biggn6lqu4b1l" path="res://scripts/cinematic_controller.gd" id="24_phfsf"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lbhrr"]
 texture = ExtResource("3_u068y")
@@ -232,6 +233,9 @@ bg_color = Color(0.21158531, 0.2062661, 0.17708245, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kvpfn"]
 bg_color = Color(0.11483263, 0.69268703, 7.70092e-07, 1)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mti6b"]
+size = Vector2(44, 77.75)
+
 [node name="Level1" type="Node2D" unique_id=1248430715]
 
 [node name="GameManager" type="Node" parent="." unique_id=684178173]
@@ -401,38 +405,66 @@ theme_override_fonts/font = ExtResource("10_7dkav")
 theme_override_font_sizes/font_size = 8
 text = "level 1"
 
-[node name="Enemy" type="Node" parent="." unique_id=2101779996]
+[node name="Enemy" type="Node2D" parent="." unique_id=1864002837]
 
 [node name="Enemy1" parent="Enemy" unique_id=1946445908 instance=ExtResource("11_4niyd")]
 position = Vector2(65, -7)
-
-[node name="Enemy2" parent="Enemy" unique_id=220699239 instance=ExtResource("12_3umqw")]
-position = Vector2(117, -6)
-
-[node name="Enemy3" parent="Enemy" unique_id=987874184 instance=ExtResource("12_3umqw")]
-position = Vector2(85, -110)
-
-[node name="Enemy4" parent="Enemy" unique_id=1426114813 instance=ExtResource("12_3umqw")]
-position = Vector2(155, -76)
 
 [node name="Ladders2" type="Node" parent="." unique_id=1515050416]
 
 [node name="Ladder" parent="Ladders2" unique_id=1017189453 instance=ExtResource("13_1ooyw")]
 position = Vector2(222, -28)
-rotation = -3.1415927
+rotation = 3.1415925
 scale = Vector2(0.6484304, -3.1606803)
 
 [node name="Ladder2" parent="Ladders2" unique_id=1687578378 instance=ExtResource("13_1ooyw")]
 position = Vector2(102.00001, -117)
-rotation = -3.1415927
+rotation = 3.1415925
 scale = Vector2(0.6484304, -2.400679)
 
 [node name="Ladder3" parent="Ladders2" unique_id=263531104 instance=ExtResource("13_1ooyw")]
 position = Vector2(367, -57.999996)
-rotation = -3.1415927
+rotation = 3.1415925
 scale = Vector2(0.6484304, -6.7206793)
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=805540167]
+
+[node name="FirstPlayTitleOverlay" type="CanvasLayer" parent="UI" unique_id=1780862076]
+layer = 50
+
+[node name="Root" type="Control" parent="UI/FirstPlayTitleOverlay" unique_id=14041066]
+z_index = 10
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TitleImage" type="TextureRect" parent="UI/FirstPlayTitleOverlay/Root" unique_id=987640209]
+layout_mode = 0
+offset_left = 372.0
+offset_top = 101.0
+offset_right = 792.0
+offset_bottom = 281.0
+offset_transform_enabled = true
+texture = ExtResource("14_ai3nx")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StartButton" type="Button" parent="UI/FirstPlayTitleOverlay/Root" unique_id=719435131]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -100.0
+offset_top = -205.0
+offset_right = 100.0
+offset_bottom = -155.0
+grow_horizontal = 2
+grow_vertical = 0
 
 [node name="PlayerHPBar" type="ProgressBar" parent="UI" unique_id=1402353928]
 offset_left = 20.0
@@ -507,6 +539,50 @@ next_scene_path = "uid://dbe57g3awynsj"
 position = Vector2(203, -77)
 
 [node name="Ladders" type="Node2D" parent="." unique_id=1178931838]
+
+[node name="Cinematic" type="Node2D" parent="." unique_id=485300322 node_paths=PackedStringArray("title_overlay", "start_button", "player", "player_camera", "intro_camera", "explosion_point", "player_appear_point", "player_landing_point", "intact_wall", "broken_wall", "wall_collision")]
+script = ExtResource("24_phfsf")
+title_overlay = NodePath("../UI/FirstPlayTitleOverlay")
+start_button = NodePath("../UI/FirstPlayTitleOverlay/Root/StartButton")
+player = NodePath("../Player")
+player_camera = NodePath("../Player/Camera2D")
+intro_camera = NodePath("IntroCamera")
+explosion_point = NodePath("ExplosionPoint")
+player_appear_point = NodePath("PlayerAppearPoint")
+player_landing_point = NodePath("PlayerLandingPoint")
+intact_wall = NodePath("PrisonWall/IntactWall")
+broken_wall = NodePath("PrisonWall/BrokenWall")
+wall_collision = NodePath("PrisonWall/WallBody/CollisionShape2D")
+
+[node name="IntroCamera" type="Camera2D" parent="Cinematic" unique_id=1452257441]
+scale = Vector2(1, 0.521)
+enabled = false
+zoom = Vector2(3, 3)
+
+[node name="ExplosionPoint" type="Marker2D" parent="Cinematic" unique_id=1135961870]
+position = Vector2(-113, -43)
+
+[node name="PlayerAppearPoint" type="Marker2D" parent="Cinematic" unique_id=593394284]
+position = Vector2(-119, -61)
+
+[node name="PlayerLandingPoint" type="Marker2D" parent="Cinematic" unique_id=1899744443]
+position = Vector2(-46, -4)
+
+[node name="PrisonWall" type="Node2D" parent="Cinematic" unique_id=2049516443]
+
+[node name="IntactWall" type="Sprite2D" parent="Cinematic/PrisonWall" unique_id=1536228672]
+
+[node name="BrokenWall" type="Sprite2D" parent="Cinematic/PrisonWall" unique_id=416710325]
+visible = false
+
+[node name="WallBody" type="StaticBody2D" parent="Cinematic/PrisonWall" unique_id=1201916348]
+position = Vector2(-127, -33)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Cinematic/PrisonWall/WallBody" unique_id=1633783075]
+position = Vector2(23, 4.875)
+shape = SubResource("RectangleShape2D_mti6b")
+
+[node name="Dialogue" type="Node" parent="Cinematic" unique_id=50207665]
 
 [editable path="Platforms/Platform_Fac1"]
 [editable path="Platforms/Platform_Fac3"]
