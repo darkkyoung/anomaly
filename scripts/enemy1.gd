@@ -72,6 +72,7 @@ var patrol_timer: float = 0.0
 
 var patrol_action: PatrolAction = PatrolAction.STOP
 var patrol_facing: int = 1
+var patrol_forced_direction: int = 0
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var player_damage_area: Area2D = $PlayerDamageArea
@@ -260,14 +261,36 @@ func choose_next_patrol_action() -> void:
 		PATROL_ACTION_TIME_MIN,
 		PATROL_ACTION_TIME_MAX
 	)
+	
+	# 범위 끝/벽 때문에 방향을 강제로 돌린 직후라면
+	# 다음 행동은 반드시 그 방향으로 이동
+	if patrol_forced_direction != 0:
+		patrol_facing = patrol_forced_direction
 
-	# 순찰 범위 가장자리에 있으면 랜덤 선택하지 않고 안쪽으로 돌아봄
-	if global_position.x <= left_limit + 1.0:
-		start_patrol_turn(1)
+		if patrol_forced_direction < 0:
+			patrol_action = PatrolAction.MOVE_LEFT
+		else:
+			patrol_action = PatrolAction.MOVE_RIGHT
+
+		patrol_forced_direction = 0
+
+		apply_patrol_facing()
+		animated_sprite.play("idle")
 		return
 
-	if global_position.x >= right_limit - 1.0:
-		start_patrol_turn(-1)
+	# 예외적으로 범위 바깥에서 시작했을 경우 즉시 안쪽으로 이동
+	if global_position.x <= left_limit:
+		patrol_action = PatrolAction.MOVE_RIGHT
+		patrol_facing = 1
+		apply_patrol_facing()
+		animated_sprite.play("idle")
+		return
+
+	if global_position.x >= right_limit:
+		patrol_action = PatrolAction.MOVE_LEFT
+		patrol_facing = -1
+		apply_patrol_facing()
+		animated_sprite.play("idle")
 		return
 
 	# 4개 행동 중 완전 랜덤
@@ -301,6 +324,8 @@ func choose_next_patrol_action() -> void:
 func start_patrol_turn(new_facing: int) -> void:
 	patrol_action = PatrolAction.STOP_TURN
 	patrol_facing = new_facing
+	patrol_forced_direction = new_facing
+
 	velocity.x = 0.0
 
 	patrol_timer = randf_range(
