@@ -550,7 +550,7 @@ next_scene_path = "uid://dbe57g3awynsj"
 [node name="Objects" type="Node2D" parent="." unique_id=1876754035]
 
 [node name="Box" parent="Objects" unique_id=1225711327 instance=ExtResource("13_gqmnx")]
-position = Vector2(249, -9)
+position = Vector2(203, -77)
 
 [node name="Ladders" type="Node2D" parent="." unique_id=1178931838]
 

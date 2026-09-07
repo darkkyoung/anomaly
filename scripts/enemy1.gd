@@ -6,6 +6,13 @@ enum EnemyMode {
 	CINEMATIC_DEFEND
 }
 
+enum PatrolAction {
+	MOVE_LEFT,
+	MOVE_RIGHT,
+	STOP,
+	STOP_TURN
+}
+
 const SPEED: float = 85.0
 const GRAVITY_MULTIPLIER: float = 1.0
 
@@ -33,11 +40,8 @@ const DETECTION_RANGE_Y: float = 100.0
 
 const PATROL_SPEED: float = 35.0
 
-const PATROL_WALK_TIME_MIN: float = 1.0
-const PATROL_WALK_TIME_MAX: float = 2.8
-
-const PATROL_IDLE_TIME_MIN: float = 0.6
-const PATROL_IDLE_TIME_MAX: float = 1.8
+const PATROL_ACTION_TIME_MIN: float = 0.7
+const PATROL_ACTION_TIME_MAX: float = 2.0
 
 @export var max_hp: int = 3
 
@@ -64,10 +68,10 @@ var player: Node = null
 var enemy_mode: EnemyMode = EnemyMode.COMBAT
 
 var patrol_origin_x: float = 0.0
-var patrol_direction: int = 1
-
-var patrol_is_waiting: bool = false
 var patrol_timer: float = 0.0
+
+var patrol_action: PatrolAction = PatrolAction.STOP
+var patrol_facing: int = 1
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var player_damage_area: Area2D = $PlayerDamageArea
@@ -84,11 +88,11 @@ func _ready() -> void:
 
 	if start_in_patrol:
 		enemy_mode = EnemyMode.PATROL
-		start_patrol_walk()
+		patrol_facing = direction
+		choose_next_patrol_action()
 	else:
 		enemy_mode = EnemyMode.COMBAT
-
-	animated_sprite.play("idle")
+		animated_sprite.play("idle")
 
 	player_damage_area.monitoring = true
 	player_damage_shape.disabled = false
@@ -134,9 +138,12 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	
 	if enemy_mode == EnemyMode.PATROL:
-		if is_on_wall():
-			patrol_direction *= -1
-			start_patrol_idle()
+		if (
+			patrol_action == PatrolAction.MOVE_LEFT
+			or patrol_action == PatrolAction.MOVE_RIGHT
+		):
+			if is_on_wall():
+				start_patrol_turn(-patrol_facing)
 
 
 func decide_action() -> void:
@@ -206,91 +213,109 @@ func process_patrol(delta: float) -> void:
 	var left_limit: float = patrol_origin_x - patrol_left_distance
 	var right_limit: float = patrol_origin_x + patrol_right_distance
 
-	# 쉬는 상태
-	if patrol_is_waiting:
-		velocity.x = 0.0
-		patrol_timer -= delta
-
-		if patrol_timer <= 0.0:
-			start_patrol_walk()
-
-		return
-
-	# 왼쪽 순찰 한계
-	if global_position.x <= left_limit:
-		global_position.x = left_limit
-		patrol_direction = 1
-		start_patrol_idle()
-		return
-
-	# 오른쪽 순찰 한계
-	if global_position.x >= right_limit:
-		global_position.x = right_limit
-		patrol_direction = -1
-		start_patrol_idle()
-		return
-
-	velocity.x = patrol_direction * PATROL_SPEED
-
-	update_patrol_facing()
-
 	patrol_timer -= delta
 
-	# 어느 정도 걸은 뒤 멈춤
+	# 현재 행동 시간이 끝나면 새로운 행동 랜덤 선택
 	if patrol_timer <= 0.0:
-		start_patrol_idle()
+		choose_next_patrol_action()
+
+	match patrol_action:
+		PatrolAction.MOVE_LEFT:
+			# 왼쪽 Patrol 한계에 도달
+			if global_position.x <= left_limit:
+				global_position.x = left_limit
+				start_patrol_turn(1)
+				return
+
+			patrol_facing = -1
+			apply_patrol_facing()
+			velocity.x = -PATROL_SPEED
 
 
-func start_patrol_walk() -> void:
-	patrol_is_waiting = false
+		PatrolAction.MOVE_RIGHT:
+			# 오른쪽 Patrol 한계에 도달
+			if global_position.x >= right_limit:
+				global_position.x = right_limit
+				start_patrol_turn(-1)
+				return
 
-	patrol_timer = randf_range(
-		PATROL_WALK_TIME_MIN,
-		PATROL_WALK_TIME_MAX
-	)
+			patrol_facing = 1
+			apply_patrol_facing()
+			velocity.x = PATROL_SPEED
 
+
+		PatrolAction.STOP:
+			velocity.x = 0.0
+
+
+		PatrolAction.STOP_TURN:
+			velocity.x = 0.0
+
+
+func choose_next_patrol_action() -> void:
 	var left_limit: float = patrol_origin_x - patrol_left_distance
 	var right_limit: float = patrol_origin_x + patrol_right_distance
 
-	# 범위 끝 근처라면 반드시 안쪽으로 이동
-	if global_position.x <= left_limit + 2.0:
-		patrol_direction = 1
+	patrol_timer = randf_range(
+		PATROL_ACTION_TIME_MIN,
+		PATROL_ACTION_TIME_MAX
+	)
 
-	elif global_position.x >= right_limit - 2.0:
-		patrol_direction = -1
+	# 순찰 범위 가장자리에 있으면 랜덤 선택하지 않고 안쪽으로 돌아봄
+	if global_position.x <= left_limit + 1.0:
+		start_patrol_turn(1)
+		return
 
-	# 범위 안쪽에서는 랜덤하게 방향 선택
-	else:
-		if randf() < 0.5:
-			patrol_direction = -1
-		else:
-			patrol_direction = 1
+	if global_position.x >= right_limit - 1.0:
+		start_patrol_turn(-1)
+		return
 
-	update_patrol_facing()
+	# 4개 행동 중 완전 랜덤
+	var choice: int = randi_range(0, 3)
 
-	if animated_sprite.sprite_frames.has_animation("enemy1_walk"):
-		animated_sprite.play("enemy1_walk")
-	else:
-		animated_sprite.play("idle")
+	match choice:
+		0:
+			patrol_action = PatrolAction.MOVE_LEFT
+			patrol_facing = -1
+			apply_patrol_facing()
+
+		1:
+			patrol_action = PatrolAction.MOVE_RIGHT
+			patrol_facing = 1
+			apply_patrol_facing()
+
+		2:
+			# 그냥 현재 방향으로 서 있음
+			patrol_action = PatrolAction.STOP
+
+		3:
+			# 서 있는 상태에서 반대 방향으로 돌아봄
+			patrol_action = PatrolAction.STOP_TURN
+			patrol_facing *= -1
+			apply_patrol_facing()
+
+	# walk sprite는 현재 깨져 있으므로 임시로 idle 사용
+	animated_sprite.play("idle")
 
 
-func start_patrol_idle() -> void:
-	patrol_is_waiting = true
+func start_patrol_turn(new_facing: int) -> void:
+	patrol_action = PatrolAction.STOP_TURN
+	patrol_facing = new_facing
 	velocity.x = 0.0
 
 	patrol_timer = randf_range(
-		PATROL_IDLE_TIME_MIN,
-		PATROL_IDLE_TIME_MAX
+		PATROL_ACTION_TIME_MIN,
+		PATROL_ACTION_TIME_MAX
 	)
 
-	if animated_sprite.sprite_frames.has_animation("idle"):
-		animated_sprite.play("idle")
+	apply_patrol_facing()
+	animated_sprite.play("idle")
 
 
-func update_patrol_facing() -> void:
-	direction = patrol_direction
+func apply_patrol_facing() -> void:
+	direction = patrol_facing
 
-	if patrol_direction > 0:
+	if patrol_facing > 0:
 		animated_sprite.flip_h = false
 	else:
 		animated_sprite.flip_h = true
@@ -556,13 +581,13 @@ func set_patrol_mode() -> void:
 	velocity.x = 0.0
 
 	patrol_origin_x = global_position.x
+	patrol_facing = direction
 
-	start_patrol_walk()
-	
+	choose_next_patrol_action()
+
+
 func set_combat_mode() -> void:
 	enemy_mode = EnemyMode.COMBAT
-
-	patrol_is_waiting = false
 	velocity.x = 0.0
 
 	if animated_sprite.sprite_frames.has_animation("idle"):
