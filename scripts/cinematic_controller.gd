@@ -12,6 +12,7 @@ const PLAYER_FALL_DURATION: float = 0.55
 
 @export var explosion_point: Marker2D
 @export var player_appear_point: Marker2D
+@export var player_arc_point: Marker2D
 @export var player_landing_point: Marker2D
 
 @export var intact_wall: Sprite2D
@@ -96,35 +97,50 @@ func shake_intro_camera(duration: float, strength: float) -> void:
 	intro_camera.offset = original_offset
 	
 func play_player_entrance() -> void:
-	# 플레이어가 화면에 처음 보이는 고점으로 이동
-	player.global_position = player_appear_point.global_position
+	var start_position: Vector2 = player_appear_point.global_position
+	var arc_position: Vector2 = player_arc_point.global_position
+	var end_position: Vector2 = player_landing_point.global_position
 
-	# 이제 화면에 등장
+	player.global_position = start_position
 	player.visible = true
+	player.velocity = Vector2.ZERO
 
 	player_sprite.play("jump")
 
 	print("PLAYER APPEARED")
 
-	# 아래쪽 고정 착지 지점으로 낙하
 	var tween: Tween = create_tween()
 
-	tween.set_trans(Tween.TRANS_QUAD)
-	tween.set_ease(Tween.EASE_IN)
-
-	tween.tween_property(
-		player,
-		"global_position",
-		player_landing_point.global_position,
+	tween.tween_method(
+		Callable(self, "_update_player_arc").bind(
+			start_position,
+			arc_position,
+			end_position
+		),
+		0.0,
+		1.0,
 		PLAYER_FALL_DURATION
 	)
 
 	await tween.finished
 
-	# 정확한 착지 위치 보정
-	player.global_position = player_landing_point.global_position
+	player.global_position = end_position
 	player.velocity = Vector2.ZERO
 
 	player_sprite.play("idle")
 
 	print("PLAYER LANDED")
+	
+func _update_player_arc(
+	t: float,
+	start_position: Vector2,
+	arc_position: Vector2,
+	end_position: Vector2
+) -> void:
+	var inverse_t: float = 1.0 - t
+
+	player.global_position = (
+		inverse_t * inverse_t * start_position
+		+ 2.0 * inverse_t * t * arc_position
+		+ t * t * end_position
+	)

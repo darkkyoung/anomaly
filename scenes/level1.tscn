@@ -409,6 +409,20 @@ text = "level 1"
 
 [node name="Enemy1" parent="Enemy" unique_id=1946445908 instance=ExtResource("11_4niyd")]
 position = Vector2(65, -7)
+start_in_patrol = true
+patrol_left_distance = 50.0
+patrol_right_distance = 50.0
+
+[node name="Enemy2" parent="Enemy" unique_id=220699239 instance=ExtResource("11_4niyd")]
+position = Vector2(174, -6)
+start_in_patrol = true
+patrol_right_distance = 70.0
+
+[node name="Enemy3" parent="Enemy" unique_id=1917335595 instance=ExtResource("11_4niyd")]
+position = Vector2(306, -3)
+start_in_patrol = true
+patrol_left_distance = 40.0
+patrol_right_distance = 40.0
 
 [node name="Ladders2" type="Node" parent="." unique_id=1515050416]
 
@@ -540,7 +554,7 @@ position = Vector2(203, -77)
 
 [node name="Ladders" type="Node2D" parent="." unique_id=1178931838]
 
-[node name="Cinematic" type="Node2D" parent="." unique_id=485300322 node_paths=PackedStringArray("title_overlay", "start_button", "player", "player_camera", "intro_camera", "explosion_point", "player_appear_point", "player_landing_point", "intact_wall", "broken_wall", "wall_collision")]
+[node name="Cinematic" type="Node2D" parent="." unique_id=485300322 node_paths=PackedStringArray("title_overlay", "start_button", "player", "player_camera", "intro_camera", "explosion_point", "player_appear_point", "player_arc_point", "player_landing_point", "intact_wall", "broken_wall", "wall_collision")]
 script = ExtResource("24_phfsf")
 title_overlay = NodePath("../UI/FirstPlayTitleOverlay")
 start_button = NodePath("../UI/FirstPlayTitleOverlay/Root/StartButton")
@@ -549,6 +563,7 @@ player_camera = NodePath("../Player/Camera2D")
 intro_camera = NodePath("IntroCamera")
 explosion_point = NodePath("ExplosionPoint")
 player_appear_point = NodePath("PlayerAppearPoint")
+player_arc_point = NodePath("PlayerArcPoint")
 player_landing_point = NodePath("PlayerLandingPoint")
 intact_wall = NodePath("PrisonWall/IntactWall")
 broken_wall = NodePath("PrisonWall/BrokenWall")
@@ -563,7 +578,10 @@ zoom = Vector2(3, 3)
 position = Vector2(-113, -43)
 
 [node name="PlayerAppearPoint" type="Marker2D" parent="Cinematic" unique_id=593394284]
-position = Vector2(-119, -61)
+position = Vector2(-127, -51)
+
+[node name="PlayerArcPoint" type="Marker2D" parent="Cinematic" unique_id=1111216857]
+position = Vector2(-70, -66)
 
 [node name="PlayerLandingPoint" type="Marker2D" parent="Cinematic" unique_id=1899744443]
 position = Vector2(-46, -4)

@@ -1,5 +1,11 @@
 extends CharacterBody2D
 
+enum EnemyMode {
+	PATROL,
+	COMBAT,
+	CINEMATIC_DEFEND
+}
+
 const SPEED: float = 85.0
 const GRAVITY_MULTIPLIER: float = 1.0
 
@@ -25,7 +31,20 @@ const DASH_LAUNCH_POWER: float = 260.0
 const DETECTION_RANGE_X: float = 220.0
 const DETECTION_RANGE_Y: float = 100.0
 
+const PATROL_SPEED: float = 35.0
+
+const PATROL_WALK_TIME_MIN: float = 1.0
+const PATROL_WALK_TIME_MAX: float = 2.8
+
+const PATROL_IDLE_TIME_MIN: float = 0.6
+const PATROL_IDLE_TIME_MAX: float = 1.8
+
 @export var max_hp: int = 3
+
+@export var start_in_patrol: bool = false
+
+@export var patrol_left_distance: float = 80.0
+@export var patrol_right_distance: float = 80.0
 
 var current_hp: int
 var direction: int = 1
@@ -42,6 +61,14 @@ var knockback_velocity: float = 0.0
 var target_player: Node = null
 var player: Node = null
 
+var enemy_mode: EnemyMode = EnemyMode.COMBAT
+
+var patrol_origin_x: float = 0.0
+var patrol_direction: int = 1
+
+var patrol_is_waiting: bool = false
+var patrol_timer: float = 0.0
+
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var player_damage_area: Area2D = $PlayerDamageArea
 @onready var player_damage_shape: CollisionShape2D = $PlayerDamageArea/CollisionShape2D
@@ -52,7 +79,15 @@ func _ready() -> void:
 	add_to_group("enemy")
 
 	player = get_tree().get_first_node_in_group("player")
-	
+
+	patrol_origin_x = global_position.x
+
+	if start_in_patrol:
+		enemy_mode = EnemyMode.PATROL
+		start_patrol_walk()
+	else:
+		enemy_mode = EnemyMode.COMBAT
+
 	animated_sprite.play("idle")
 
 	player_damage_area.monitoring = true
@@ -86,9 +121,22 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
-	decide_action()
+	match enemy_mode:
+		EnemyMode.PATROL:
+			process_patrol(delta)
+
+		EnemyMode.COMBAT:
+			decide_action()
+
+		EnemyMode.CINEMATIC_DEFEND:
+			velocity.x = 0.0
 
 	move_and_slide()
+	
+	if enemy_mode == EnemyMode.PATROL:
+		if is_on_wall():
+			patrol_direction *= -1
+			start_patrol_idle()
 
 
 func decide_action() -> void:
@@ -154,6 +202,100 @@ func decide_action() -> void:
 			animated_sprite.play("idle")
 
 
+func process_patrol(delta: float) -> void:
+	var left_limit: float = patrol_origin_x - patrol_left_distance
+	var right_limit: float = patrol_origin_x + patrol_right_distance
+
+	# 쉬는 상태
+	if patrol_is_waiting:
+		velocity.x = 0.0
+		patrol_timer -= delta
+
+		if patrol_timer <= 0.0:
+			start_patrol_walk()
+
+		return
+
+	# 왼쪽 순찰 한계
+	if global_position.x <= left_limit:
+		global_position.x = left_limit
+		patrol_direction = 1
+		start_patrol_idle()
+		return
+
+	# 오른쪽 순찰 한계
+	if global_position.x >= right_limit:
+		global_position.x = right_limit
+		patrol_direction = -1
+		start_patrol_idle()
+		return
+
+	velocity.x = patrol_direction * PATROL_SPEED
+
+	update_patrol_facing()
+
+	patrol_timer -= delta
+
+	# 어느 정도 걸은 뒤 멈춤
+	if patrol_timer <= 0.0:
+		start_patrol_idle()
+
+
+func start_patrol_walk() -> void:
+	patrol_is_waiting = false
+
+	patrol_timer = randf_range(
+		PATROL_WALK_TIME_MIN,
+		PATROL_WALK_TIME_MAX
+	)
+
+	var left_limit: float = patrol_origin_x - patrol_left_distance
+	var right_limit: float = patrol_origin_x + patrol_right_distance
+
+	# 범위 끝 근처라면 반드시 안쪽으로 이동
+	if global_position.x <= left_limit + 2.0:
+		patrol_direction = 1
+
+	elif global_position.x >= right_limit - 2.0:
+		patrol_direction = -1
+
+	# 범위 안쪽에서는 랜덤하게 방향 선택
+	else:
+		if randf() < 0.5:
+			patrol_direction = -1
+		else:
+			patrol_direction = 1
+
+	update_patrol_facing()
+
+	if animated_sprite.sprite_frames.has_animation("enemy1_walk"):
+		animated_sprite.play("enemy1_walk")
+	else:
+		animated_sprite.play("idle")
+
+
+func start_patrol_idle() -> void:
+	patrol_is_waiting = true
+	velocity.x = 0.0
+
+	patrol_timer = randf_range(
+		PATROL_IDLE_TIME_MIN,
+		PATROL_IDLE_TIME_MAX
+	)
+
+	if animated_sprite.sprite_frames.has_animation("idle"):
+		animated_sprite.play("idle")
+
+
+func update_patrol_facing() -> void:
+	direction = patrol_direction
+
+	if patrol_direction > 0:
+		animated_sprite.flip_h = false
+	else:
+		animated_sprite.flip_h = true
+
+
 func take_damage(amount: int, knockback_direction: int = 0, knockback_power: float = 180.0) -> void:
 	if is_dead:
 		return
@@ -196,6 +338,9 @@ func play_hit_animation() -> void:
 
 func damage_player(player_body: Node) -> void:
 	if is_dead:
+		return
+	
+	if enemy_mode != EnemyMode.COMBAT:
 		return
 
 	if not can_attack:
@@ -257,6 +402,9 @@ func damage_player(player_body: Node) -> void:
 
 func start_dash_attack(player_body: Node) -> void:
 	if is_dead:
+		return
+	
+	if enemy_mode != EnemyMode.COMBAT:
 		return
 
 	if not can_dash:
@@ -378,6 +526,9 @@ func die() -> void:
 func _on_player_damage_area_body_entered(body: Node2D) -> void:
 	if body == null:
 		return
+	
+	if enemy_mode != EnemyMode.COMBAT:
+		return
 
 	if not is_instance_valid(body):
 		return
@@ -394,3 +545,25 @@ func _on_player_damage_area_body_entered(body: Node2D) -> void:
 func _on_player_damage_area_body_exited(body: Node2D) -> void:
 	if target_player != null and body == target_player:
 		target_player = null
+
+
+func set_patrol_mode() -> void:
+	enemy_mode = EnemyMode.PATROL
+
+	is_attacking = false
+	is_dashing = false
+
+	velocity.x = 0.0
+
+	patrol_origin_x = global_position.x
+
+	start_patrol_walk()
+	
+func set_combat_mode() -> void:
+	enemy_mode = EnemyMode.COMBAT
+
+	patrol_is_waiting = false
+	velocity.x = 0.0
+
+	if animated_sprite.sprite_frames.has_animation("idle"):
+		animated_sprite.play("idle")
