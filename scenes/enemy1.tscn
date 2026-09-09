@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://dbrn82sf0yky2" path="res://assets/sprites/enemies/enemy1_attack.png" id="2_lowyn"]
 [ext_resource type="Texture2D" uid="uid://yq4xkaj66i36" path="res://assets/sprites/enemies/enemy1_dash.png" id="2_ncnv8"]
 [ext_resource type="PackedScene" uid="uid://crxqvo3cr0ptm" path="res://scenes/killzone.tscn" id="3_iolyx"]
+[ext_resource type="Texture2D" uid="uid://te3m2lirlyow" path="res://assets/sprites/enemies/enemy1_defend.png" id="4_ncnv8"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tmbj3"]
 atlas = ExtResource("2_lowyn")
@@ -13,6 +14,22 @@ region = Rect2(0, 0, 1536, 1024)
 [sub_resource type="AtlasTexture" id="AtlasTexture_l0xj3"]
 atlas = ExtResource("2_ncnv8")
 region = Rect2(0, 0, 1400, 1024)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6rrpu"]
+atlas = ExtResource("4_ncnv8")
+region = Rect2(0, 0, 543, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_u5km1"]
+atlas = ExtResource("4_ncnv8")
+region = Rect2(543, 0, 543, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_katti"]
+atlas = ExtResource("4_ncnv8")
+region = Rect2(1086, 0, 543, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mes3p"]
+atlas = ExtResource("4_ncnv8")
+region = Rect2(1629, 0, 543, 724)
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_l0xj3"]
 
@@ -53,6 +70,35 @@ animations = [{
 "loop": 1,
 "name": &"enemy1_dash",
 "speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6rrpu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_u5km1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_katti")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_u5km1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_katti")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_u5km1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_katti")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mes3p")
+}],
+"loop": 0,
+"name": &"enemy1_defend",
+"speed": 3.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -98,8 +144,9 @@ script = ExtResource("1_n665k")
 position = Vector2(4.7683716e-07, -2.3841858e-07)
 scale = Vector2(0.035546876, 0.035546876)
 sprite_frames = SubResource("SpriteFrames_4kxuq")
-animation = &"enemy1_attack"
+animation = &"enemy1_defend"
 autoplay = "idle"
+frame_progress = 0.15310876
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=217627231]
 shape = SubResource("RectangleShape2D_n6pvg")

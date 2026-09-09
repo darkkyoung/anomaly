@@ -40,8 +40,14 @@ const DETECTION_RANGE_Y: float = 100.0
 
 const PATROL_SPEED: float = 35.0
 
-const PATROL_ACTION_TIME_MIN: float = 0.7
-const PATROL_ACTION_TIME_MAX: float = 2.0
+const PATROL_MOVE_TIME_MIN: float = 0.7
+const PATROL_MOVE_TIME_MAX: float = 2.0
+
+const PATROL_STOP_TIME_MIN: float = 1.0
+const PATROL_STOP_TIME_MAX: float = 5.0
+
+const PATROL_TURN_TIME_MIN: float = 0.5
+const PATROL_TURN_TIME_MAX: float = 1.2
 
 @export var max_hp: int = 3
 
@@ -257,13 +263,8 @@ func choose_next_patrol_action() -> void:
 	var left_limit: float = patrol_origin_x - patrol_left_distance
 	var right_limit: float = patrol_origin_x + patrol_right_distance
 
-	patrol_timer = randf_range(
-		PATROL_ACTION_TIME_MIN,
-		PATROL_ACTION_TIME_MAX
-	)
-	
-	# 범위 끝/벽 때문에 방향을 강제로 돌린 직후라면
-	# 다음 행동은 반드시 그 방향으로 이동
+	# 벽/범위 끝에서 방향을 강제로 돌린 직후라면
+	# 다음 행동은 반드시 안쪽으로 이동
 	if patrol_forced_direction != 0:
 		patrol_facing = patrol_forced_direction
 
@@ -274,50 +275,94 @@ func choose_next_patrol_action() -> void:
 
 		patrol_forced_direction = 0
 
+		patrol_timer = randf_range(
+			PATROL_MOVE_TIME_MIN,
+			PATROL_MOVE_TIME_MAX
+		)
+
 		apply_patrol_facing()
 		animated_sprite.play("idle")
 		return
 
-	# 예외적으로 범위 바깥에서 시작했을 경우 즉시 안쪽으로 이동
+	# 왼쪽 경계에 있다면 오른쪽으로 이동
 	if global_position.x <= left_limit:
 		patrol_action = PatrolAction.MOVE_RIGHT
 		patrol_facing = 1
+
+		patrol_timer = randf_range(
+			PATROL_MOVE_TIME_MIN,
+			PATROL_MOVE_TIME_MAX
+		)
+
 		apply_patrol_facing()
 		animated_sprite.play("idle")
 		return
 
+	# 오른쪽 경계에 있다면 왼쪽으로 이동
 	if global_position.x >= right_limit:
 		patrol_action = PatrolAction.MOVE_LEFT
 		patrol_facing = -1
+
+		patrol_timer = randf_range(
+			PATROL_MOVE_TIME_MIN,
+			PATROL_MOVE_TIME_MAX
+		)
+
 		apply_patrol_facing()
 		animated_sprite.play("idle")
 		return
 
-	# 4개 행동 중 완전 랜덤
+	# 범위 안에서는 4개 행동 중 하나 랜덤 선택
 	var choice: int = randi_range(0, 3)
 
 	match choice:
 		0:
+			# 왼쪽 이동
 			patrol_action = PatrolAction.MOVE_LEFT
 			patrol_facing = -1
+
+			patrol_timer = randf_range(
+				PATROL_MOVE_TIME_MIN,
+				PATROL_MOVE_TIME_MAX
+			)
+
 			apply_patrol_facing()
 
 		1:
+			# 오른쪽 이동
 			patrol_action = PatrolAction.MOVE_RIGHT
 			patrol_facing = 1
+
+			patrol_timer = randf_range(
+				PATROL_MOVE_TIME_MIN,
+				PATROL_MOVE_TIME_MAX
+			)
+
 			apply_patrol_facing()
 
 		2:
-			# 그냥 현재 방향으로 서 있음
+			# 현재 방향을 바라보며 1~5초 정지
 			patrol_action = PatrolAction.STOP
+			velocity.x = 0.0
+
+			patrol_timer = randf_range(
+				PATROL_STOP_TIME_MIN,
+				PATROL_STOP_TIME_MAX
+			)
 
 		3:
-			# 서 있는 상태에서 반대 방향으로 돌아봄
+			# 정지한 상태에서 반대 방향을 보고 1~5초 대기
 			patrol_action = PatrolAction.STOP_TURN
+			velocity.x = 0.0
+
 			patrol_facing *= -1
 			apply_patrol_facing()
 
-	# walk sprite는 현재 깨져 있으므로 임시로 idle 사용
+			patrol_timer = randf_range(
+				PATROL_STOP_TIME_MIN,
+				PATROL_STOP_TIME_MAX
+			)
+
 	animated_sprite.play("idle")
 
 
@@ -329,8 +374,8 @@ func start_patrol_turn(new_facing: int) -> void:
 	velocity.x = 0.0
 
 	patrol_timer = randf_range(
-		PATROL_ACTION_TIME_MIN,
-		PATROL_ACTION_TIME_MAX
+		PATROL_TURN_TIME_MIN,
+		PATROL_TURN_TIME_MAX
 	)
 
 	apply_patrol_facing()
@@ -611,8 +656,41 @@ func set_patrol_mode() -> void:
 	choose_next_patrol_action()
 
 
+func set_cinematic_defend(explosion_position: Vector2) -> void:
+	enemy_mode = EnemyMode.CINEMATIC_DEFEND
+
+	# 기존 행동 즉시 중단
+	is_attacking = false
+	is_dashing = false
+	velocity.x = 0.0
+	knockback_velocity = 0.0
+
+	# 폭발 위치를 바라봄
+	var diff_x: float = explosion_position.x - global_position.x
+
+	if abs(diff_x) > 1.0:
+		direction = int(sign(diff_x))
+		patrol_facing = direction
+		apply_patrol_facing()
+
+	# 방어 스프라이트는 나중에 추가
+	if animated_sprite.sprite_frames.has_animation("enemy1_defend"):
+		animated_sprite.play("enemy1_defend")
+	else:
+		animated_sprite.play("idle")
+
+	print("ENEMY DEFEND: ", name)
+
+
 func set_combat_mode() -> void:
 	enemy_mode = EnemyMode.COMBAT
+
+	is_attacking = false
+	is_dashing = false
+
+	can_attack = true
+	can_dash = true
+
 	velocity.x = 0.0
 
 	if animated_sprite.sprite_frames.has_animation("idle"):

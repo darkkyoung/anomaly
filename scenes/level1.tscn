@@ -17,12 +17,16 @@
 [ext_resource type="Texture2D" uid="uid://ddcsqaiem2pcu" path="res://assets/sprites/ui/title_logo.png" id="14_ai3nx"]
 [ext_resource type="Texture2D" uid="uid://mf3mkpeq86bc" path="res://assets/backgrounds/factory_stage1_bg.png" id="14_p71k4"]
 [ext_resource type="Texture2D" uid="uid://c06ssbu82q6jf" path="res://assets/backgrounds/bg_watchtower.png" id="15_1oofn"]
+[ext_resource type="Script" uid="uid://dl0cg240caook" path="res://scripts/dialogue_box.gd" id="15_phfsf"]
 [ext_resource type="Texture2D" uid="uid://b0icvmliugcyf" path="res://assets/backgrounds/bg_crain.png" id="16_6i0tl"]
 [ext_resource type="Texture2D" uid="uid://cgcr6llppijcq" path="res://assets/backgrounds/bg_factory1.png" id="17_6lx4c"]
 [ext_resource type="Texture2D" uid="uid://bk6viw6nva4am" path="res://assets/backgrounds/bg_factory2.png" id="18_6xmqk"]
 [ext_resource type="Texture2D" uid="uid://btimjq3vxlqev" path="res://assets/backgrounds/bg_bg_factory1.png" id="19_hvrd6"]
 [ext_resource type="PackedScene" uid="uid://dt2wltrrdprsv" path="res://scenes/exit.tscn" id="20_3w4mx"]
 [ext_resource type="Script" uid="uid://biggn6lqu4b1l" path="res://scripts/cinematic_controller.gd" id="24_phfsf"]
+[ext_resource type="Texture2D" uid="uid://dgq0mme7p3gcb" path="res://assets/sprites/structures/prison_wall_intact.png" id="25_mq0oc"]
+[ext_resource type="Texture2D" uid="uid://cikgauoohgsu7" path="res://assets/sprites/effects/explosion_8frames.png" id="25_msy1c"]
+[ext_resource type="Texture2D" uid="uid://krsyl21mtl4m" path="res://assets/sprites/structures/prison_wall_broken.png" id="26_msy1c"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lbhrr"]
 texture = ExtResource("3_u068y")
@@ -233,8 +237,80 @@ bg_color = Color(0.21158531, 0.2062661, 0.17708245, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kvpfn"]
 bg_color = Color(0.11483263, 0.69268703, 7.70092e-07, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_phfsf"]
+bg_color = Color(0, 0, 0, 0.6862745)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+corner_radius_bottom_right = 10
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7dkav"]
+atlas = ExtResource("25_msy1c")
+region = Rect2(0, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4niyd"]
+atlas = ExtResource("25_msy1c")
+region = Rect2(512, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3umqw"]
+atlas = ExtResource("25_msy1c")
+region = Rect2(1024, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gqmnx"]
+atlas = ExtResource("25_msy1c")
+region = Rect2(1536, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p71k4"]
+atlas = ExtResource("25_msy1c")
+region = Rect2(0, 512, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1oofn"]
+atlas = ExtResource("25_msy1c")
+region = Rect2(512, 512, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6i0tl"]
+atlas = ExtResource("25_msy1c")
+region = Rect2(1024, 512, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6lx4c"]
+atlas = ExtResource("25_msy1c")
+region = Rect2(1536, 512, 512, 512)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_4kxuq"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7dkav")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4niyd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3umqw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gqmnx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p71k4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1oofn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6i0tl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6lx4c")
+}],
+"loop": 0,
+"name": &"explode",
+"speed": 12.0
+}]
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mti6b"]
-size = Vector2(44, 77.75)
+size = Vector2(26.527012, 44.875)
 
 [node name="Level1" type="Node2D" unique_id=1248430715]
 
@@ -461,7 +537,9 @@ offset_left = 372.0
 offset_top = 101.0
 offset_right = 792.0
 offset_bottom = 281.0
+pivot_offset_ratio = Vector2(0.5, 0.5)
 offset_transform_enabled = true
+offset_transform_scale = Vector2(1.5, 1.5)
 texture = ExtResource("14_ai3nx")
 expand_mode = 1
 stretch_mode = 5
@@ -493,6 +571,68 @@ value = 20.0
 show_percentage = false
 
 [node name="Pause_menu" parent="UI" unique_id=1247716696 instance=ExtResource("13_u068y")]
+
+[node name="DialogueBox" type="Control" parent="UI" unique_id=362479115]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("15_phfsf")
+
+[node name="Panel" type="Panel" parent="UI/DialogueBox" unique_id=74867057]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 126.0
+offset_top = -130.0
+offset_right = -126.0
+offset_bottom = -18.0
+grow_horizontal = 2
+grow_vertical = 0
+offset_transform_enabled = true
+theme_override_styles/panel = SubResource("StyleBoxFlat_phfsf")
+
+[node name="Portrait" type="TextureRect" parent="UI/DialogueBox/Panel" unique_id=650695711]
+visible = false
+layout_mode = 0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = 112.0
+offset_bottom = 104.0
+
+[node name="SpeakerLabel" type="Label" parent="UI/DialogueBox/Panel" unique_id=2129205382]
+layout_mode = 0
+offset_left = 130.0
+offset_top = 12.0
+offset_right = 380.0
+offset_bottom = 38.0
+theme_override_font_sizes/font_size = 18
+text = "쵸로키"
+vertical_alignment = 1
+
+[node name="DialogueLabel" type="Label" parent="UI/DialogueBox/Panel" unique_id=304323578]
+custom_minimum_size = Vector2(700, 0)
+layout_mode = 0
+offset_left = 130.0
+offset_top = 40.0
+offset_right = 830.0
+offset_bottom = 92.0
+theme_override_font_sizes/font_size = 22
+text = "테스트 대"
+autowrap_mode = 3
+
+[node name="NextButton" type="Button" parent="UI/DialogueBox/Panel" unique_id=2083761668]
+layout_mode = 0
+offset_left = 846.0
+offset_top = 82.0
+offset_right = 874.0
+offset_bottom = 113.0
+text = "▼"
 
 [node name="Background" type="Node2D" parent="." unique_id=117131350]
 
@@ -554,10 +694,12 @@ position = Vector2(249, -9)
 
 [node name="Ladders" type="Node2D" parent="." unique_id=1178931838]
 
-[node name="Cinematic" type="Node2D" parent="." unique_id=485300322 node_paths=PackedStringArray("title_overlay", "start_button", "player", "player_camera", "intro_camera", "explosion_point", "player_appear_point", "player_arc_point", "player_landing_point", "intact_wall", "broken_wall", "wall_collision")]
+[node name="Cinematic" type="Node2D" parent="." unique_id=485300322 node_paths=PackedStringArray("title_overlay", "start_button", "dialogue_box", "player_hp_bar", "player", "player_camera", "intro_camera", "explosion_point", "player_appear_point", "player_arc_point", "player_landing_point", "intact_wall", "broken_wall", "wall_collision")]
 script = ExtResource("24_phfsf")
 title_overlay = NodePath("../UI/FirstPlayTitleOverlay")
 start_button = NodePath("../UI/FirstPlayTitleOverlay/Root/StartButton")
+dialogue_box = NodePath("../UI/DialogueBox")
+player_hp_bar = NodePath("../UI/PlayerHPBar")
 player = NodePath("../Player")
 player_camera = NodePath("../Player/Camera2D")
 intro_camera = NodePath("IntroCamera")
@@ -570,37 +712,52 @@ broken_wall = NodePath("PrisonWall/BrokenWall")
 wall_collision = NodePath("PrisonWall/WallBody/CollisionShape2D")
 
 [node name="IntroCamera" type="Camera2D" parent="Cinematic" unique_id=1452257441]
+position = Vector2(-8, -30)
 scale = Vector2(1, 0.521)
 enabled = false
-zoom = Vector2(3, 3)
+zoom = Vector2(4.5, 4.5)
 
 [node name="ExplosionPoint" type="Marker2D" parent="Cinematic" unique_id=1135961870]
-position = Vector2(-113, -43)
+position = Vector2(-103, -19)
+
+[node name="ExplosionFX" type="AnimatedSprite2D" parent="Cinematic/ExplosionPoint" unique_id=1280263630]
+visible = false
+z_index = 10
+scale = Vector2(0.3, 0.3)
+sprite_frames = SubResource("SpriteFrames_4kxuq")
+animation = &"explode"
 
 [node name="PlayerAppearPoint" type="Marker2D" parent="Cinematic" unique_id=593394284]
-position = Vector2(-127, -51)
+position = Vector2(-111, -30)
 
 [node name="PlayerArcPoint" type="Marker2D" parent="Cinematic" unique_id=1111216857]
-position = Vector2(-70, -66)
+position = Vector2(-85, -48)
 
 [node name="PlayerLandingPoint" type="Marker2D" parent="Cinematic" unique_id=1899744443]
-position = Vector2(-46, -4)
+position = Vector2(-52, -3)
 
 [node name="PrisonWall" type="Node2D" parent="Cinematic" unique_id=2049516443]
 
 [node name="IntactWall" type="Sprite2D" parent="Cinematic/PrisonWall" unique_id=1536228672]
+z_index = 2
+position = Vector2(-105, -15)
+scale = Vector2(0.08, 0.08)
+texture = ExtResource("25_mq0oc")
 
 [node name="BrokenWall" type="Sprite2D" parent="Cinematic/PrisonWall" unique_id=416710325]
 visible = false
+z_index = 2
+position = Vector2(-105, -15)
+scale = Vector2(0.08, 0.08)
+texture = ExtResource("26_msy1c")
 
 [node name="WallBody" type="StaticBody2D" parent="Cinematic/PrisonWall" unique_id=1201916348]
-position = Vector2(-127, -33)
+position = Vector2(-244, -41)
+scale = Vector2(5.9200034, 1)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Cinematic/PrisonWall/WallBody" unique_id=1633783075]
-position = Vector2(23, 4.875)
+position = Vector2(23.479717, 27)
 shape = SubResource("RectangleShape2D_mti6b")
-
-[node name="Dialogue" type="Node" parent="Cinematic" unique_id=50207665]
 
 [editable path="Platforms/Platform_Fac1"]
 [editable path="Platforms/Platform_Fac3"]
