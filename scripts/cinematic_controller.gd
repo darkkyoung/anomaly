@@ -15,8 +15,10 @@ const PLAYER_FALL_DURATION: float = 0.55
 @export var intro_camera: Camera2D
 
 @export var explosion_point: Marker2D
+
 @export var player_appear_point: Marker2D
 @export var player_arc_point: Marker2D
+@export var player_front_point: Marker2D
 @export var player_landing_point: Marker2D
 
 @export var intact_wall: Sprite2D
@@ -28,6 +30,10 @@ const PLAYER_FALL_DURATION: float = 0.55
 
 var cinematic_started: bool = false
 var player_sprite: AnimatedSprite2D
+
+var player_moved_to_front: bool = false
+const PLAYER_NORMAL_Z: int = 5
+const PLAYER_BEHIND_WALL_Z: int = -2
 
 
 func _ready() -> void:
@@ -51,8 +57,6 @@ func prepare_intro() -> void:
 	
 	# 시네마틱 중 hp바 숨김
 	player_hp_bar.visible = false
-	
-	broken_wall.z_index = 2
 
 	start_button.pressed.connect(_on_start_pressed)
 	
@@ -123,7 +127,7 @@ func explode_prison_wall() -> void:
 	# 폭발이 어느 정도 진행된 뒤 벽이 무너짐
 	intact_wall.visible = false
 	broken_wall.visible = true
-	wall_collision.set_deferred("disabled", true)
+	wall_collision.set_deferred("disabled", false)
 
 	# 나머지 폭발/연기 프레임이 끝날 때까지 기다림
 	if explosion_fx.is_playing():
@@ -154,11 +158,13 @@ func play_player_entrance() -> void:
 	var end_position: Vector2 = player_landing_point.global_position
 
 	player.global_position = start_position
-	# 플레이어가 벽을 넘어오는 순간
-	# 파괴된 벽을 캐릭터들 뒤쪽으로 보냄
-	broken_wall.z_index = -1
-	
+
+	# 처음 등장할 때는 파괴된 벽 뒤쪽
+	player.z_index = PLAYER_BEHIND_WALL_Z
+	player_moved_to_front = false
+
 	player.visible = true
+	
 	player.velocity = Vector2.ZERO
 
 	player_sprite.play("jump")
@@ -181,6 +187,10 @@ func play_player_entrance() -> void:
 	await tween.finished
 
 	player.global_position = end_position
+	
+	player.z_index = PLAYER_NORMAL_Z
+	player_moved_to_front = true
+	
 	player.velocity = Vector2.ZERO
 
 	player_sprite.play("idle")
@@ -200,6 +210,13 @@ func _update_player_arc(
 		+ 2.0 * inverse_t * t * arc_position
 		+ t * t * end_position
 	)
+	
+	if (
+		not player_moved_to_front
+		and player.global_position.x >= player_front_point.global_position.x
+	):
+		player.z_index = PLAYER_NORMAL_Z
+		player_moved_to_front = true
 
 
 func play_intro_dialogue() -> void:
