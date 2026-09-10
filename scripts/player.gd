@@ -275,30 +275,12 @@ func attack(attack_direction: Vector2) -> void:
 	else:
 		animated_sprite.play("attack1")
 
-	update_attack_area_position(attack_direction)
+		update_attack_area_position(attack_direction)
 
+	# 실제 데미지 판정은 공격 애니메이션 3번 프레임에서
+	# apply_attack_damage()가 처리한다.
 	attack_area.monitoring = false
-	attack_shape.disabled = false
-
-	await get_tree().physics_frame
-
-	for area in attack_area.get_overlapping_areas():
-		var enemy = area.get_parent()
-
-		if enemy == null:
-			continue
-
-		if already_hit_enemies.has(enemy):
-			continue
-
-		if enemy.has_method("take_damage"):
-			var knockback_direction = sign(enemy.global_position.x - global_position.x)
-
-			if knockback_direction == 0:
-				knockback_direction = 1
-
-			enemy.take_damage(ATTACK_DAMAGE, knockback_direction, 180.0)
-			already_hit_enemies.append(enemy)
+	attack_shape.disabled = true
 
 	await get_tree().create_timer(ATTACK_TIME).timeout
 

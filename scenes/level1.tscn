@@ -21,6 +21,7 @@
 [ext_resource type="Texture2D" uid="uid://bk6viw6nva4am" path="res://assets/backgrounds/bg_factory2.png" id="18_6xmqk"]
 [ext_resource type="Texture2D" uid="uid://btimjq3vxlqev" path="res://assets/backgrounds/bg_bg_factory1.png" id="19_hvrd6"]
 [ext_resource type="PackedScene" uid="uid://dt2wltrrdprsv" path="res://scenes/exit.tscn" id="20_3w4mx"]
+[ext_resource type="Texture2D" uid="uid://cbkpvfh74qsig" path="res://assets/s1 l1.png" id="21_mq0oc"]
 [ext_resource type="Script" uid="uid://biggn6lqu4b1l" path="res://scripts/cinematic_controller.gd" id="24_phfsf"]
 [ext_resource type="Texture2D" uid="uid://dgq0mme7p3gcb" path="res://assets/sprites/structures/prison_wall_intact.png" id="25_mq0oc"]
 [ext_resource type="Texture2D" uid="uid://cikgauoohgsu7" path="res://assets/sprites/effects/explosion_8frames.png" id="25_msy1c"]
@@ -500,6 +501,7 @@ rotation = 3.1415925
 scale = Vector2(0.6484304, -6.7206793)
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=805540167]
+visible = false
 
 [node name="FirstPlayTitleOverlay" type="CanvasLayer" parent="UI" unique_id=1780862076]
 layer = 50
@@ -677,6 +679,13 @@ scale = Vector2(0.13449451, 0.13449451)
 texture = ExtResource("25_mq0oc")
 flip_h = true
 metadata/_edit_lock_ = true
+
+[node name="S1L1" type="Sprite2D" parent="Background" unique_id=1964543369]
+visible = false
+modulate = Color(1, 1, 1, 0.34901962)
+position = Vector2(791.00006, -73)
+scale = Vector2(1.2202445, 1.2202445)
+texture = ExtResource("21_mq0oc")
 
 [node name="Triggers" type="Node2D" parent="." unique_id=209210890]
 
