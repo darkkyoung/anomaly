@@ -35,9 +35,27 @@ const AIR_ATTACK_DAMAGE: int = 1
 const SLAM_WINDUP_TIME: float = 0.10
 const SLAM_FALL_SPEED: float = 520.0
 
-const SLAM_BASE_DAMAGE: int = 1
-const SLAM_DAMAGE_DISTANCE_STEP: float = 100.0
-const SLAM_MAX_DAMAGE: int = 3
+const SLAM_MEDIUM_DISTANCE: float = 100.0
+const SLAM_STRONG_DISTANCE: float = 200.0
+
+const SLAM_WEAK_DAMAGE: int = 1
+const SLAM_MEDIUM_DAMAGE: int = 2
+const SLAM_STRONG_DAMAGE: int = 3
+
+const SLAM_SHAKE_DURATION_WEAK: float = 0.08
+const SLAM_SHAKE_DURATION_MEDIUM: float = 0.12
+const SLAM_SHAKE_DURATION_STRONG: float = 0.18
+
+# Hit Stop
+const HIT_STOP_TIME_SCALE: float = 0.05
+
+const HIT_STOP_NORMAL: float = 0.035
+const HIT_STOP_UPPERCUT: float = 0.060
+const HIT_STOP_AIR_ATTACK: float = 0.050
+
+const HIT_STOP_SLAM_WEAK: float = 0.045
+const HIT_STOP_SLAM_MEDIUM: float = 0.070
+const HIT_STOP_SLAM_STRONG: float = 0.095
 
 var current_ladder: Area2D = null
 var is_climbing: bool = false
@@ -48,6 +66,12 @@ enum AttackType {
 	UPPERCUT,
 	SLAM,
 	AIR_NORMAL
+}
+
+enum SlamImpactLevel {
+	WEAK,
+	MEDIUM,
+	STRONG
 }
 
 var current_attack: AttackType = AttackType.NONE
@@ -66,6 +90,40 @@ var is_dead: bool = false
 var hp: int = MAX_HP
 var is_invincible: bool = false
 var knockback_velocity: float = 0.0
+var hit_stop_id: int = 0
+
+
+func play_hit_stop(duration: float) -> void:
+	hit_stop_id += 1
+
+	var this_hit_stop_id: int = hit_stop_id
+
+	# 게임 전체를 거의 정지
+	Engine.time_scale = HIT_STOP_TIME_SCALE
+
+	# time_scale의 영향을 받지 않는 실제 시간 타이머
+	await get_tree().create_timer(
+		duration,
+		true,
+		false,
+		true
+	).timeout
+
+	if not is_inside_tree():
+		return
+
+	# 새로운 히트스톱이 이미 발생했다면
+	# 이전 타이머가 시간을 원상복구하지 못하게 함
+	if this_hit_stop_id != hit_stop_id:
+		return
+
+	Engine.time_scale = 1.0
+
+
+func _exit_tree() -> void:
+	# 히트스톱 중 씬이 종료되어도
+	# 다음 씬이 느려지는 문제 방지
+	Engine.time_scale = 1.0
 
 func _ready() -> void:
 	add_to_group("player")
@@ -122,7 +180,12 @@ func _physics_process(delta: float) -> void:
 		velocity += get_gravity() * delta
 
 	# Handle jump.
-	if Input.is_action_just_pressed("jump") and is_on_floor():
+	if (
+		Input.is_action_just_pressed("jump")
+		and is_on_floor()
+		and not is_attacking
+		and not is_slamming
+	):
 		velocity.y = JUMP_VELOCITY
 		
 	# Attack
@@ -309,6 +372,15 @@ func request_attack(
 	attack_type: AttackType,
 	attack_direction: Vector2
 ) -> void:
+	if is_dead:
+		return
+
+	if is_attacking:
+		return
+
+	if is_slamming:
+		return
+
 	current_attack = attack_type
 
 	match current_attack:
@@ -408,13 +480,21 @@ func check_slam_hits() -> void:
 			0.0
 		)
 
-		var damage: int = calculate_slam_damage(fall_distance)
+		var impact_level: SlamImpactLevel = get_slam_impact_level(
+			fall_distance
+		)
+
+		var damage: int = get_slam_damage(
+			impact_level
+		)
 
 		print(
 			"SLAM HIT: ",
 			enemy.name,
-			" / fall distance=",
+			" / distance=",
 			fall_distance,
+			" / level=",
+			SlamImpactLevel.keys()[impact_level],
 			" / damage=",
 			damage
 		)
@@ -422,19 +502,123 @@ func check_slam_hits() -> void:
 		enemy.take_slam_damage(damage)
 
 		already_hit_enemies.append(enemy)
+		
+		var slam_hit_stop: float = get_slam_hit_stop_time(
+			impact_level
+		)
+
+		play_hit_stop(slam_hit_stop)
 
 
-func calculate_slam_damage(fall_distance: float) -> int:
-	var bonus_damage: int = int(
-		floor(fall_distance / SLAM_DAMAGE_DISTANCE_STEP)
-	)
+func get_slam_impact_level(
+	fall_distance: float
+) -> SlamImpactLevel:
+	if fall_distance >= SLAM_STRONG_DISTANCE:
+		return SlamImpactLevel.STRONG
 
-	var damage: int = SLAM_BASE_DAMAGE + bonus_damage
+	if fall_distance >= SLAM_MEDIUM_DISTANCE:
+		return SlamImpactLevel.MEDIUM
 
-	if damage > SLAM_MAX_DAMAGE:
-		damage = SLAM_MAX_DAMAGE
+	return SlamImpactLevel.WEAK
 
-	return damage
+
+func get_slam_damage(
+	impact_level: SlamImpactLevel
+) -> int:
+	match impact_level:
+		SlamImpactLevel.STRONG:
+			return SLAM_STRONG_DAMAGE
+
+		SlamImpactLevel.MEDIUM:
+			return SLAM_MEDIUM_DAMAGE
+
+		_:
+			return SLAM_WEAK_DAMAGE
+
+
+func get_slam_effect_scale(
+	impact_level: SlamImpactLevel
+) -> float:
+	match impact_level:
+		SlamImpactLevel.STRONG:
+			return 1.6
+
+		SlamImpactLevel.MEDIUM:
+			return 1.25
+
+		_:
+			return 1.0
+
+
+func get_slam_hit_stop_time(
+	impact_level: SlamImpactLevel
+) -> float:
+	match impact_level:
+		SlamImpactLevel.STRONG:
+			return HIT_STOP_SLAM_STRONG
+
+		SlamImpactLevel.MEDIUM:
+			return HIT_STOP_SLAM_MEDIUM
+
+		_:
+			return HIT_STOP_SLAM_WEAK
+
+
+func get_slam_shake_strength(
+	impact_level: SlamImpactLevel
+) -> float:
+	match impact_level:
+		SlamImpactLevel.STRONG:
+			return 8.0
+
+		SlamImpactLevel.MEDIUM:
+			return 5.0
+
+		_:
+			return 2.5
+
+
+func get_slam_shake_duration(
+	impact_level: SlamImpactLevel
+) -> float:
+	match impact_level:
+		SlamImpactLevel.STRONG:
+			return SLAM_SHAKE_DURATION_STRONG
+
+		SlamImpactLevel.MEDIUM:
+			return SLAM_SHAKE_DURATION_MEDIUM
+
+		_:
+			return SLAM_SHAKE_DURATION_WEAK
+
+
+func play_camera_shake(
+	strength: float,
+	duration: float
+) -> void:
+	var camera: Camera2D = get_viewport().get_camera_2d()
+
+	if camera == null:
+		return
+
+	var original_offset: Vector2 = camera.offset
+
+	var start_time: int = Time.get_ticks_msec()
+	var duration_ms: int = int(duration * 1000.0)
+
+	while Time.get_ticks_msec() - start_time < duration_ms:
+		if not is_instance_valid(camera):
+			return
+
+		camera.offset = original_offset + Vector2(
+			randf_range(-strength, strength),
+			randf_range(-strength * 0.65, strength * 0.65)
+		)
+
+		await get_tree().process_frame
+
+	if is_instance_valid(camera):
+		camera.offset = original_offset
 
 
 func finish_slam() -> void:
@@ -445,10 +629,29 @@ func finish_slam() -> void:
 		global_position.y - slam_start_y,
 		0.0
 	)
+	
+	var impact_level: SlamImpactLevel = get_slam_impact_level(
+		last_slam_fall_distance
+	)
+	
+	var shake_strength: float = get_slam_shake_strength(
+		impact_level
+	)
+
+	var shake_duration: float = get_slam_shake_duration(
+		impact_level
+	)
+
+	play_camera_shake(
+		shake_strength,
+		shake_duration
+	)
 
 	print(
-		"SLAM LAND / fall distance: ",
-		last_slam_fall_distance
+		"SLAM LAND / distance=",
+		last_slam_fall_distance,
+		" / level=",
+		SlamImpactLevel.keys()[impact_level]
 	)
 
 	is_slamming = false
@@ -539,6 +742,9 @@ func apply_attack_damage() -> void:
 			)
 
 			already_hit_enemies.append(enemy)
+
+			play_hit_stop(HIT_STOP_UPPERCUT)
+
 			continue
 		
 		# 공중 일반 공격
@@ -552,6 +758,9 @@ func apply_attack_damage() -> void:
 			)
 
 			already_hit_enemies.append(enemy)
+
+			play_hit_stop(HIT_STOP_AIR_ATTACK)
+
 			continue
 
 		# 일반 공격
@@ -563,6 +772,8 @@ func apply_attack_damage() -> void:
 			)
 
 			already_hit_enemies.append(enemy)
+
+			play_hit_stop(HIT_STOP_NORMAL)
 
 	attack_area.monitoring = false
 	attack_shape.disabled = true

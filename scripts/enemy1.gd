@@ -85,9 +85,9 @@ var knockback_velocity: float = 0.0
 
 var is_uppercut_launched: bool = false
 var is_stunned: bool = false
-
 var is_slam_launched: bool = false
 var is_knocked_down: bool = false
+var hit_state_id: int = 0
 
 var is_air_attack_launched: bool = false
 
@@ -513,6 +513,8 @@ func apply_patrol_facing() -> void:
 func take_slam_damage(amount: int) -> void:
 	if is_dead:
 		return
+	
+	hit_state_id += 1
 
 	current_hp -= amount
 	current_hp = max(current_hp, 0)
@@ -533,8 +535,6 @@ func take_slam_damage(amount: int) -> void:
 	is_uppercut_launched = false
 	is_stunned = false
 	is_knocked_down = false
-
-	slam_state_id += 1
 
 	if current_hp <= 0:
 		die()
@@ -564,7 +564,7 @@ func start_slam_knockdown() -> void:
 	is_knocked_down = true
 	velocity = Vector2.ZERO
 
-	var this_slam_id: int = slam_state_id
+	var this_hit_state_id: int = hit_state_id
 
 	print("SLAM KNOCKDOWN: ", name)
 
@@ -578,7 +578,7 @@ func start_slam_knockdown() -> void:
 
 	# 다운 중 다른 SLAM에 다시 맞았으면
 	# 이전 타이머는 상태를 풀지 않음
-	if this_slam_id != slam_state_id:
+	if this_hit_state_id != hit_state_id:
 		return
 
 	is_knocked_down = false
@@ -601,6 +601,8 @@ func take_uppercut_damage(
 ) -> void:
 	if is_dead:
 		return
+	
+	hit_state_id += 1
 
 	current_hp -= amount
 	current_hp = max(current_hp, 0)
@@ -650,16 +652,20 @@ func start_uppercut_stun() -> void:
 
 	is_stunned = true
 	velocity = Vector2.ZERO
+	
+	var this_hit_state_id: int = hit_state_id
 
 	print("UPPERCUT STUN: ", name)
 
 	# 지금은 전용 쓰러짐 Sprite가 없으므로 현재 모습 유지
 	await get_tree().create_timer(UPPERCUT_STUN_TIME).timeout
-
 	if is_dead:
 		return
 
 	if not is_inside_tree():
+		return
+	
+	if this_hit_state_id != hit_state_id:
 		return
 
 	is_stunned = false
@@ -684,7 +690,8 @@ func take_air_attack_damage(
 ) -> void:
 	if is_dead:
 		return
-
+	hit_state_id += 1
+	
 	current_hp -= amount
 	current_hp = max(current_hp, 0)
 
