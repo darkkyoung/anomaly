@@ -30,6 +30,14 @@ const STOMP_BOUNCE_VELOCITY: float = -220.0
 var current_ladder: Area2D = null
 var is_climbing: bool = false
 
+enum AttackType {
+	NONE,
+	GROUND_NORMAL,
+	UPPERCUT,
+	SLAM,
+	AIR_NORMAL
+}
+
 var is_attacking: bool = false
 var already_hit_enemies: Array = []
 var facing_direction: int = 1
@@ -102,14 +110,27 @@ func _physics_process(delta: float) -> void:
 	if not is_attacking:
 		if Input.is_action_just_pressed("attack_left"):
 			facing_direction = -1
-			attack(Vector2.LEFT)
+
+			if is_on_floor():
+				request_attack(AttackType.GROUND_NORMAL, Vector2.LEFT)
+			else:
+				request_attack(AttackType.AIR_NORMAL, Vector2.LEFT)
+
 		elif Input.is_action_just_pressed("attack_right"):
 			facing_direction = 1
-			attack(Vector2.RIGHT)
+
+			if is_on_floor():
+				request_attack(AttackType.GROUND_NORMAL, Vector2.RIGHT)
+			else:
+				request_attack(AttackType.AIR_NORMAL, Vector2.RIGHT)
+
 		elif Input.is_action_just_pressed("attack_up"):
-			attack(Vector2.UP)
+			if is_on_floor():
+				request_attack(AttackType.UPPERCUT, Vector2.UP)
+
 		elif Input.is_action_just_pressed("attack_down"):
-			attack(Vector2.DOWN)
+			if not is_on_floor():
+				request_attack(AttackType.SLAM, Vector2.DOWN)
 
 	# Get the input direction: -1, 0, 1
 	var direction := Input.get_axis("move_left", "move_right")
@@ -259,6 +280,29 @@ func check_stomp_collisions(fall_speed_before_move: float) -> void:
 
 		break;
 
+
+func request_attack(
+	attack_type: AttackType,
+	attack_direction: Vector2
+) -> void:
+	current_attack = attack_type
+
+	match current_attack:
+		AttackType.GROUND_NORMAL:
+			print("ATTACK: GROUND NORMAL")
+
+		AttackType.UPPERCUT:
+			print("ATTACK: UPPERCUT")
+
+		AttackType.SLAM:
+			print("ATTACK: SLAM")
+
+		AttackType.AIR_NORMAL:
+			print("ATTACK: AIR NORMAL")
+
+	attack(attack_direction)
+
+
 func attack(attack_direction: Vector2) -> void:
 	is_attacking = true
 	attack_has_hit = false
@@ -287,6 +331,7 @@ func attack(attack_direction: Vector2) -> void:
 	attack_area.monitoring = false
 	attack_shape.disabled = true
 	is_attacking = false
+	current_attack = AttackType.NONE
 
 func apply_attack_damage() -> void:
 	attack_area.monitoring = true
@@ -331,9 +376,12 @@ func _on_animated_sprite_2d_animation_finished() -> void:
 	if animated_sprite.animation == "attack1":
 		is_attacking = false
 		attack_has_hit = false
+		current_attack = AttackType.NONE
+		
 		attack_area.monitoring = false
 		attack_shape.disabled = true
 		animated_sprite.play("idle")
+		
 
 func take_damage(
 	amount: int,
