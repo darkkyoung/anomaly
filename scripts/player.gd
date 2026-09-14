@@ -351,6 +351,8 @@ func apply_attack_damage() -> void:
 	await get_tree().physics_frame
 
 	for area in attack_area.get_overlapping_areas():
+		print("OVERLAP AREA: ", area.name)
+		
 		var enemy = area.get_parent()
 
 		if enemy == null:
@@ -398,16 +400,27 @@ func apply_attack_damage() -> void:
 		velocity.y = UPPERCUT_PLAYER_VELOCITY
 
 func update_attack_area_position(attack_direction: Vector2) -> void:
-	var attack_distance = 28
+	var attack_distance: float = 28.0
 
 	if attack_direction == Vector2.LEFT:
-		attack_area.position = Vector2(-attack_distance, 0)
+		attack_area.position = Vector2(-attack_distance, 0.0)
+
 	elif attack_direction == Vector2.RIGHT:
-		attack_area.position = Vector2(attack_distance, 0)
+		attack_area.position = Vector2(attack_distance, 0.0)
+
 	elif attack_direction == Vector2.UP:
-		attack_area.position = Vector2(0, -attack_distance)
+		# 어퍼컷은 머리 위가 아니라
+		# 현재 바라보는 방향의 앞 + 약간 위
+		attack_area.position = Vector2(
+			18.0 * facing_direction,
+			-10.0
+		)
+
 	elif attack_direction == Vector2.DOWN:
-		attack_area.position = Vector2(0, attack_distance)
+		attack_area.position = Vector2(
+			0.0,
+			attack_distance
+		)
 
 func _on_animated_sprite_2d_animation_finished() -> void:
 	if animated_sprite.animation == "attack1":

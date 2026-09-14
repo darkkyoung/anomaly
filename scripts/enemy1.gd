@@ -22,6 +22,9 @@ const UPPERCUT_LAUNCH_VELOCITY: float = -260.0
 const UPPERCUT_HORIZONTAL_POWER: float = 30.0
 const UPPERCUT_STUN_TIME: float = 2.0
 
+const UPPERCUT_SHAKE_AMOUNT: float = 5.0
+const UPPERCUT_SHAKE_SPEED: float = 35.0
+
 const ATTACK_DAMAGE: int = 1
 const ATTACK_COOLDOWN: float = 0.8
 const ATTACK_PAUSE_TIME: float = 0.25
@@ -75,6 +78,9 @@ var knockback_velocity: float = 0.0
 var is_uppercut_launched: bool = false
 var is_stunned: bool = false
 
+var uppercut_shake_time: float = 0.0
+var sprite_base_position: Vector2 = Vector2.ZERO
+
 var target_player: Node = null
 var player: Node = null
 
@@ -95,6 +101,8 @@ var patrol_forced_direction: int = 0
 func _ready() -> void:
 	current_hp = max_hp
 	add_to_group("enemy")
+	
+	sprite_base_position = animated_sprite.position
 
 	player = get_tree().get_first_node_in_group("player")
 
@@ -120,14 +128,36 @@ func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity += get_gravity() * GRAVITY_MULTIPLIER * delta
 	
-		# 어퍼컷으로 날아가는 상태
+	# 어퍼컷으로 날아가는 상태
 	if is_uppercut_launched:
+		uppercut_shake_time += delta
+
+		# 상승 중에만 피격 자세를 덜덜 흔듦
+		if velocity.y < 0.0:
+			var shake_x: float = sin(
+				uppercut_shake_time * UPPERCUT_SHAKE_SPEED
+			) * UPPERCUT_SHAKE_AMOUNT
+
+			animated_sprite.position = (
+				sprite_base_position
+				+ Vector2(shake_x, 0.0)
+			)
+
+		# 정점을 지나 추락하기 시작하면 흔들림 종료
+		else:
+			animated_sprite.position = sprite_base_position
+
 		move_and_slide()
 
-		# 땅에 떨어지면 1초 스턴 시작
+		# 바닥에 떨어짐
 		if is_on_floor():
 			is_uppercut_launched = false
+
 			velocity = Vector2.ZERO
+
+			# 혹시 남은 흔들림 위치 복원
+			animated_sprite.position = sprite_base_position
+
 			start_uppercut_stun()
 
 		return
@@ -456,6 +486,14 @@ func take_uppercut_damage(
 	# 전용 Sprite가 아직 없으므로 기존 피격 Animation 사용
 	if animated_sprite.sprite_frames.has_animation("slime_hit"):
 		animated_sprite.play("slime_hit")
+	else:
+		animated_sprite.play("idle")
+
+	# 현재 프레임에서 자세 고정
+	animated_sprite.pause()
+
+	uppercut_shake_time = 0.0
+	sprite_base_position = animated_sprite.position
 
 
 func start_uppercut_stun() -> void:
@@ -482,6 +520,9 @@ func start_uppercut_stun() -> void:
 	can_dash = true
 
 	player_damage_area.monitoring = true
+	
+	animated_sprite.position = sprite_base_position
+	animated_sprite.speed_scale = 1.0
 
 	if animated_sprite.sprite_frames.has_animation("idle"):
 		animated_sprite.play("idle")
