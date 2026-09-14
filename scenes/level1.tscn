@@ -344,6 +344,9 @@ shape = SubResource("WorldBoundaryShape2D_4kxuq")
 [node name="Platform" parent="Platforms" unique_id=132714494 instance=ExtResource("9_msy1c")]
 position = Vector2(486, -119)
 
+[node name="Platform3" parent="Platforms" unique_id=973522036 instance=ExtResource("9_msy1c")]
+position = Vector2(279, -48)
+
 [node name="Platform2" parent="Platforms" unique_id=553527739 instance=ExtResource("9_msy1c")]
 position = Vector2(551, -45)
 
@@ -366,7 +369,7 @@ start_in_patrol = true
 patrol_right_distance = 70.0
 
 [node name="Enemy3" parent="Enemy" unique_id=1917335595 instance=ExtResource("11_4niyd")]
-position = Vector2(259, -5)
+position = Vector2(279, -65)
 start_in_patrol = true
 patrol_left_distance = 40.0
 patrol_right_distance = 40.0
@@ -510,12 +513,14 @@ position = Vector2(-227, -307)
 scale = Vector2(0.45718238, 0.45718238)
 texture = SubResource("CompressedTexture2D_1ooyw")
 centered = false
+metadata/_edit_lock_ = true
 
 [node name="FactoryBG2" type="Sprite2D" parent="Background" unique_id=401811186]
 z_index = -5
 position = Vector2(1196, -141)
 scale = Vector2(0.457, 0.457)
 texture = ExtResource("13_ai3nx")
+metadata/_edit_lock_ = true
 
 [node name="bg_watchtower" type="Sprite2D" parent="Background" unique_id=1454330128]
 z_index = -20

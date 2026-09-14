@@ -28,7 +28,16 @@ const STOMP_DAMAGE: int = 1
 const STOMP_BOUNCE_VELOCITY: float = -220.0
 
 const UPPERCUT_DAMAGE: int = 1
-const UPPERCUT_PLAYER_VELOCITY: float = -230.0
+const UPPERCUT_PLAYER_VELOCITY: float = -270.0
+
+const AIR_ATTACK_DAMAGE: int = 1
+
+const SLAM_WINDUP_TIME: float = 0.10
+const SLAM_FALL_SPEED: float = 520.0
+
+const SLAM_BASE_DAMAGE: int = 1
+const SLAM_DAMAGE_DISTANCE_STEP: float = 100.0
+const SLAM_MAX_DAMAGE: int = 3
 
 var current_ladder: Area2D = null
 var is_climbing: bool = false
@@ -42,6 +51,11 @@ enum AttackType {
 }
 
 var current_attack: AttackType = AttackType.NONE
+
+var is_slamming: bool = false
+var slam_windup_remaining: float = 0.0
+var slam_start_y: float = 0.0
+var last_slam_fall_distance: float = 0.0
 
 var is_attacking: bool = false
 var already_hit_enemies: Array = []
@@ -136,7 +150,12 @@ func _physics_process(delta: float) -> void:
 		elif Input.is_action_just_pressed("attack_down"):
 			if not is_on_floor():
 				request_attack(AttackType.SLAM, Vector2.DOWN)
-
+	
+	# 내려찍기 중에는 일반 이동/점프/공격 물리를 사용하지 않음
+	if is_slamming:
+		process_slam(delta)
+		return
+	
 	# Get the input direction: -1, 0, 1
 	var direction := Input.get_axis("move_left", "move_right")
 	
@@ -301,11 +320,152 @@ func request_attack(
 
 		AttackType.SLAM:
 			print("ATTACK: SLAM")
+			start_slam()
+			return
 
 		AttackType.AIR_NORMAL:
 			print("ATTACK: AIR NORMAL")
 
 	attack(attack_direction)
+
+
+func start_slam() -> void:
+	is_attacking = true
+	is_slamming = true
+
+	attack_has_hit = false
+	already_hit_enemies.clear()
+
+	# 내려찍기를 시작한 높이 저장
+	slam_start_y = global_position.y
+	last_slam_fall_distance = 0.0
+
+	# 짧은 공중 정지 시간
+	slam_windup_remaining = SLAM_WINDUP_TIME
+
+	# 입력 당시 움직임을 잠깐 멈춤
+	velocity = Vector2.ZERO
+
+	# 아직 전용 스프라이트가 없으므로 기존 공격 사용
+	animated_sprite.play("attack1")
+
+	# 히트박스 위치는 플레이어 아래쪽
+	update_attack_area_position(Vector2.DOWN)
+
+	attack_area.monitoring = false
+	attack_shape.disabled = true
+	
+	# 내려찍는 동안 Enemy 몸에 걸리지 않고 관통한다.
+	# Enemy는 Physics Layer 3.
+	set_collision_mask_value(3, false)
+
+
+func process_slam(delta: float) -> void:
+	# 1. 공격 직전 잠깐 공중에서 멈춤
+	if slam_windup_remaining > 0.0:
+		slam_windup_remaining -= delta
+
+		velocity = Vector2.ZERO
+
+		attack_area.monitoring = false
+		attack_shape.disabled = true
+
+		move_and_slide()
+		return
+
+	# 2. 실제 내려찍기 시작
+	attack_area.monitoring = true
+	attack_shape.disabled = false
+
+	velocity.x = 0.0
+	velocity.y = SLAM_FALL_SPEED
+
+	move_and_slide()
+
+	# 내려가는 동안 적 탐색
+	check_slam_hits()
+
+	# 3. 실제 지형 바닥에 닿았을 때 종료
+	if is_on_floor():
+		finish_slam()
+
+
+func check_slam_hits() -> void:
+	for area in attack_area.get_overlapping_areas():
+		var enemy: Node = area.get_parent()
+
+		if enemy == null:
+			continue
+
+		if already_hit_enemies.has(enemy):
+			continue
+
+		if not enemy.has_method("take_slam_damage"):
+			continue
+
+		var fall_distance: float = max(
+			global_position.y - slam_start_y,
+			0.0
+		)
+
+		var damage: int = calculate_slam_damage(fall_distance)
+
+		print(
+			"SLAM HIT: ",
+			enemy.name,
+			" / fall distance=",
+			fall_distance,
+			" / damage=",
+			damage
+		)
+
+		enemy.take_slam_damage(damage)
+
+		already_hit_enemies.append(enemy)
+
+
+func calculate_slam_damage(fall_distance: float) -> int:
+	var bonus_damage: int = int(
+		floor(fall_distance / SLAM_DAMAGE_DISTANCE_STEP)
+	)
+
+	var damage: int = SLAM_BASE_DAMAGE + bonus_damage
+
+	if damage > SLAM_MAX_DAMAGE:
+		damage = SLAM_MAX_DAMAGE
+
+	return damage
+
+
+func finish_slam() -> void:
+	if not is_slamming:
+		return
+
+	last_slam_fall_distance = max(
+		global_position.y - slam_start_y,
+		0.0
+	)
+
+	print(
+		"SLAM LAND / fall distance: ",
+		last_slam_fall_distance
+	)
+
+	is_slamming = false
+	is_attacking = false
+
+	current_attack = AttackType.NONE
+	attack_has_hit = false
+
+	velocity = Vector2.ZERO
+
+	attack_area.monitoring = false
+	attack_shape.disabled = true
+	
+	# 일반 상태로 돌아왔으므로 Enemy와 몸 충돌 복구
+	set_collision_mask_value(3, true)
+
+	animated_sprite.play("idle")
 
 
 func attack(attack_direction: Vector2) -> void:
@@ -380,6 +540,19 @@ func apply_attack_damage() -> void:
 
 			already_hit_enemies.append(enemy)
 			continue
+		
+		# 공중 일반 공격
+		if (
+			attack_type_at_hit == AttackType.AIR_NORMAL
+			and enemy.has_method("take_air_attack_damage")
+		):
+			enemy.take_air_attack_damage(
+				AIR_ATTACK_DAMAGE,
+				knockback_direction
+			)
+
+			already_hit_enemies.append(enemy)
+			continue
 
 		# 일반 공격
 		if enemy.has_method("take_damage"):
@@ -424,10 +597,14 @@ func update_attack_area_position(attack_direction: Vector2) -> void:
 
 func _on_animated_sprite_2d_animation_finished() -> void:
 	if animated_sprite.animation == "attack1":
+		# 내려찍기는 바닥에 닿을 때까지 자체 상태 유지
+		if is_slamming:
+			return
+
 		is_attacking = false
 		attack_has_hit = false
 		current_attack = AttackType.NONE
-		
+
 		attack_area.monitoring = false
 		attack_shape.disabled = true
 		animated_sprite.play("idle")

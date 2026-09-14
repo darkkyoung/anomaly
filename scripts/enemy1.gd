@@ -22,8 +22,16 @@ const UPPERCUT_LAUNCH_VELOCITY: float = -260.0
 const UPPERCUT_HORIZONTAL_POWER: float = 30.0
 const UPPERCUT_STUN_TIME: float = 2.0
 
-const UPPERCUT_SHAKE_AMOUNT: float = 5.0
-const UPPERCUT_SHAKE_SPEED: float = 35.0
+const SLAM_POP_VELOCITY: float = -150.0
+const SLAM_DOWN_TIME: float = 2.0
+
+const UPPERCUT_JITTER_INTERVAL: float = 0.025
+const UPPERCUT_JITTER_X: float = 0.7
+const UPPERCUT_JITTER_Y: float = 0.35
+
+const AIR_ATTACK_HORIZONTAL_VELOCITY: float = 420.0
+const AIR_ATTACK_VERTICAL_VELOCITY: float = -150.0
+const AIR_ATTACK_DRAG: float = 180.0
 
 const ATTACK_DAMAGE: int = 1
 const ATTACK_COOLDOWN: float = 0.8
@@ -78,7 +86,14 @@ var knockback_velocity: float = 0.0
 var is_uppercut_launched: bool = false
 var is_stunned: bool = false
 
-var uppercut_shake_time: float = 0.0
+var is_slam_launched: bool = false
+var is_knocked_down: bool = false
+
+var is_air_attack_launched: bool = false
+
+var slam_state_id: int = 0
+
+var uppercut_jitter_timer: float = 0.0
 var sprite_base_position: Vector2 = Vector2.ZERO
 
 var target_player: Node = null
@@ -130,43 +145,91 @@ func _physics_process(delta: float) -> void:
 	
 	# 어퍼컷으로 날아가는 상태
 	if is_uppercut_launched:
-		uppercut_shake_time += delta
-
-		# 상승 중에만 피격 자세를 덜덜 흔듦
+		# 상승 중에만 미세한 "버벅임" 진동
 		if velocity.y < 0.0:
-			var shake_x: float = sin(
-				uppercut_shake_time * UPPERCUT_SHAKE_SPEED
-			) * UPPERCUT_SHAKE_AMOUNT
+			uppercut_jitter_timer -= delta
 
-			animated_sprite.position = (
-				sprite_base_position
-				+ Vector2(shake_x, 0.0)
-			)
+			if uppercut_jitter_timer <= 0.0:
+				uppercut_jitter_timer = UPPERCUT_JITTER_INTERVAL
 
-		# 정점을 지나 추락하기 시작하면 흔들림 종료
+				var jitter_x: float = randf_range(
+					-UPPERCUT_JITTER_X,
+					UPPERCUT_JITTER_X
+				)
+
+				var jitter_y: float = randf_range(
+					-UPPERCUT_JITTER_Y,
+					UPPERCUT_JITTER_Y
+				)
+
+				animated_sprite.position = (
+					sprite_base_position
+					+ Vector2(jitter_x, jitter_y)
+				)
+
+		# 정점을 지나면 진동 종료
 		else:
 			animated_sprite.position = sprite_base_position
 
 		move_and_slide()
 
-		# 바닥에 떨어짐
 		if is_on_floor():
 			is_uppercut_launched = false
-
 			velocity = Vector2.ZERO
 
-			# 혹시 남은 흔들림 위치 복원
 			animated_sprite.position = sprite_base_position
 
 			start_uppercut_stun()
 
 		return
+	
+		# 내려찍기에 맞아 살짝 떠오른 상태
+		if is_slam_launched:
+			move_and_slide()
 
+			if is_on_floor():
+				is_slam_launched = false
+				velocity = Vector2.ZERO
 
+				start_slam_knockdown()
+
+			return
+
+		# 내려찍기 후 바닥에 쓰러진 상태
+		if is_knocked_down:
+			velocity = Vector2.ZERO
+			move_and_slide()
+			return
+	
 	# 스턴 상태
 	if is_stunned:
 		velocity.x = 0.0
 		move_and_slide()
+		return
+		
+	# 공중 일반 공격으로 멀리 날아가는 상태
+	if is_air_attack_launched:
+		velocity.x = move_toward(
+			velocity.x,
+			0.0,
+			AIR_ATTACK_DRAG * delta
+		)
+
+		move_and_slide()
+
+		# 바닥에 닿으면 정상 상태로 복귀
+		if is_on_floor():
+			is_air_attack_launched = false
+			velocity = Vector2.ZERO
+
+			can_attack = true
+			can_dash = true
+
+			player_damage_area.monitoring = true
+
+			if animated_sprite.sprite_frames.has_animation("idle"):
+				animated_sprite.play("idle")
+
 		return
 	
 	# 피격 넉백 처리
@@ -447,6 +510,91 @@ func apply_patrol_facing() -> void:
 		animated_sprite.flip_h = true
 
 
+func take_slam_damage(amount: int) -> void:
+	if is_dead:
+		return
+
+	current_hp -= amount
+	current_hp = max(current_hp, 0)
+
+	print("SLAM DAMAGE: ", amount)
+	print("Enemy HP: ", current_hp, "/", max_hp)
+
+	# 다른 행동 중단
+	is_attacking = false
+	is_dashing = false
+
+	can_attack = false
+	can_dash = false
+
+	knockback_velocity = 0.0
+
+	# 기존 어퍼컷 상태였다면 SLAM이 우선
+	is_uppercut_launched = false
+	is_stunned = false
+	is_knocked_down = false
+
+	slam_state_id += 1
+
+	if current_hp <= 0:
+		die()
+		return
+
+	# 살짝 위로 튀어오름
+	velocity.x = 0.0
+	velocity.y = SLAM_POP_VELOCITY
+
+	is_slam_launched = true
+
+	# 쓰러져 있는 동안 공격 판정 없음
+	player_damage_area.monitoring = false
+
+	# 아직 SLAM 전용 스프라이트가 없으므로
+	# 현재 피격 자세에서 정지
+	if animated_sprite.sprite_frames.has_animation("slime_hit"):
+		animated_sprite.play("slime_hit")
+
+	animated_sprite.pause()
+
+
+func start_slam_knockdown() -> void:
+	if is_dead:
+		return
+
+	is_knocked_down = true
+	velocity = Vector2.ZERO
+
+	var this_slam_id: int = slam_state_id
+
+	print("SLAM KNOCKDOWN: ", name)
+
+	await get_tree().create_timer(SLAM_DOWN_TIME).timeout
+
+	if not is_inside_tree():
+		return
+
+	if is_dead:
+		return
+
+	# 다운 중 다른 SLAM에 다시 맞았으면
+	# 이전 타이머는 상태를 풀지 않음
+	if this_slam_id != slam_state_id:
+		return
+
+	is_knocked_down = false
+
+	can_attack = true
+	can_dash = true
+
+	player_damage_area.monitoring = true
+
+	# pause된 Sprite 재생 복구
+	if animated_sprite.sprite_frames.has_animation("idle"):
+		animated_sprite.play("idle")
+
+	print("SLAM KNOCKDOWN END: ", name)
+
+
 func take_uppercut_damage(
 	amount: int,
 	horizontal_direction: int = 0
@@ -492,7 +640,7 @@ func take_uppercut_damage(
 	# 현재 프레임에서 자세 고정
 	animated_sprite.pause()
 
-	uppercut_shake_time = 0.0
+	uppercut_jitter_timer = 0.0
 	sprite_base_position = animated_sprite.position
 
 
@@ -528,6 +676,52 @@ func start_uppercut_stun() -> void:
 		animated_sprite.play("idle")
 
 	print("UPPERCUT STUN END: ", name)
+
+
+func take_air_attack_damage(
+	amount: int,
+	horizontal_direction: int
+) -> void:
+	if is_dead:
+		return
+
+	current_hp -= amount
+	current_hp = max(current_hp, 0)
+
+	print("AIR ATTACK HIT: ", name)
+	print("Enemy HP: ", current_hp, "/", max_hp)
+
+	# 기존 행동 전부 중단
+	is_attacking = false
+	is_dashing = false
+
+	can_attack = false
+	can_dash = false
+
+	knockback_velocity = 0.0
+
+	# 다른 특수 피격 상태가 있었다면 공중 공격으로 덮어씀
+	is_uppercut_launched = false
+	is_slam_launched = false
+	is_knocked_down = false
+	is_stunned = false
+
+	if current_hp <= 0:
+		die()
+		return
+
+	# 공격 방향으로 강하게 날림
+	velocity.x = horizontal_direction * AIR_ATTACK_HORIZONTAL_VELOCITY
+	velocity.y = AIR_ATTACK_VERTICAL_VELOCITY
+
+	is_air_attack_launched = true
+
+	# 날아가는 동안 적 공격 판정 정지
+	player_damage_area.monitoring = false
+
+	# 현재는 전용 스프라이트가 없으므로 피격 자세 사용
+	if animated_sprite.sprite_frames.has_animation("slime_hit"):
+		animated_sprite.play("slime_hit")
 
 
 func take_damage(amount: int, knockback_direction: int = 0, knockback_power: float = 180.0) -> void:
