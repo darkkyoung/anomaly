@@ -18,6 +18,10 @@ const GRAVITY_MULTIPLIER: float = 1.0
 
 const KNOCKBACK_FRICTION: float = 700.0
 
+const UPPERCUT_LAUNCH_VELOCITY: float = -260.0
+const UPPERCUT_HORIZONTAL_POWER: float = 30.0
+const UPPERCUT_STUN_TIME: float = 2.0
+
 const ATTACK_DAMAGE: int = 1
 const ATTACK_COOLDOWN: float = 0.8
 const ATTACK_PAUSE_TIME: float = 0.25
@@ -68,6 +72,9 @@ var dash_has_hit: bool = false
 var hit_anim_id: int = 0
 var knockback_velocity: float = 0.0
 
+var is_uppercut_launched: bool = false
+var is_stunned: bool = false
+
 var target_player: Node = null
 var player: Node = null
 
@@ -112,7 +119,26 @@ func _physics_process(delta: float) -> void:
 	# 중력 적용
 	if not is_on_floor():
 		velocity += get_gravity() * GRAVITY_MULTIPLIER * delta
+	
+		# 어퍼컷으로 날아가는 상태
+	if is_uppercut_launched:
+		move_and_slide()
 
+		# 땅에 떨어지면 1초 스턴 시작
+		if is_on_floor():
+			is_uppercut_launched = false
+			velocity = Vector2.ZERO
+			start_uppercut_stun()
+
+		return
+
+
+	# 스턴 상태
+	if is_stunned:
+		velocity.x = 0.0
+		move_and_slide()
+		return
+	
 	# 피격 넉백 처리
 	if abs(knockback_velocity) > 1.0:
 		velocity.x = knockback_velocity
@@ -389,6 +415,78 @@ func apply_patrol_facing() -> void:
 		animated_sprite.flip_h = false
 	else:
 		animated_sprite.flip_h = true
+
+
+func take_uppercut_damage(
+	amount: int,
+	horizontal_direction: int = 0
+) -> void:
+	if is_dead:
+		return
+
+	current_hp -= amount
+	current_hp = max(current_hp, 0)
+
+	print("UPPERCUT HIT: ", name)
+	print("Enemy HP: ", current_hp, "/", max_hp)
+
+	if current_hp <= 0:
+		die()
+		return
+
+	# 기존 행동 강제 중단
+	is_attacking = false
+	is_dashing = false
+
+	can_attack = false
+	can_dash = false
+
+	knockback_velocity = 0.0
+
+	# 위로 발사
+	velocity.y = UPPERCUT_LAUNCH_VELOCITY
+	velocity.x = horizontal_direction * UPPERCUT_HORIZONTAL_POWER
+
+	is_uppercut_launched = true
+	is_stunned = false
+
+	# 떠 있는 동안 플레이어 공격 금지
+	player_damage_area.monitoring = false
+
+	# 전용 Sprite가 아직 없으므로 기존 피격 Animation 사용
+	if animated_sprite.sprite_frames.has_animation("slime_hit"):
+		animated_sprite.play("slime_hit")
+
+
+func start_uppercut_stun() -> void:
+	if is_dead:
+		return
+
+	is_stunned = true
+	velocity = Vector2.ZERO
+
+	print("UPPERCUT STUN: ", name)
+
+	# 지금은 전용 쓰러짐 Sprite가 없으므로 현재 모습 유지
+	await get_tree().create_timer(UPPERCUT_STUN_TIME).timeout
+
+	if is_dead:
+		return
+
+	if not is_inside_tree():
+		return
+
+	is_stunned = false
+
+	can_attack = true
+	can_dash = true
+
+	player_damage_area.monitoring = true
+
+	if animated_sprite.sprite_frames.has_animation("idle"):
+		animated_sprite.play("idle")
+
+	print("UPPERCUT STUN END: ", name)
 
 
 func take_damage(amount: int, knockback_direction: int = 0, knockback_power: float = 180.0) -> void:

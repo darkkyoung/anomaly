@@ -360,12 +360,6 @@ text = "level 1"
 
 [node name="Enemy" type="Node2D" parent="." unique_id=1864002837]
 
-[node name="Enemy1" parent="Enemy" unique_id=1946445908 instance=ExtResource("11_4niyd")]
-position = Vector2(65, -7)
-start_in_patrol = true
-patrol_left_distance = 50.0
-patrol_right_distance = 50.0
-
 [node name="Enemy2" parent="Enemy" unique_id=220699239 instance=ExtResource("11_4niyd")]
 position = Vector2(174, -6)
 start_in_patrol = true
@@ -384,6 +378,7 @@ patrol_left_distance = 40.0
 patrol_right_distance = 40.0
 
 [node name="S1L1" type="Sprite2D" parent="." unique_id=1964543369]
+visible = false
 modulate = Color(1, 1, 1, 0.34901962)
 position = Vector2(709.00006, -47)
 scale = Vector2(0.97994155, 0.97994155)

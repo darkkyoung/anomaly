@@ -27,6 +27,9 @@ const BOX_PUSH_SPEED: float = 55.0
 const STOMP_DAMAGE: int = 1
 const STOMP_BOUNCE_VELOCITY: float = -220.0
 
+const UPPERCUT_DAMAGE: int = 1
+const UPPERCUT_PLAYER_VELOCITY: float = -230.0
+
 var current_ladder: Area2D = null
 var is_climbing: bool = false
 
@@ -37,6 +40,8 @@ enum AttackType {
 	SLAM,
 	AIR_NORMAL
 }
+
+var current_attack: AttackType = AttackType.NONE
 
 var is_attacking: bool = false
 var already_hit_enemies: Array = []
@@ -312,17 +317,19 @@ func attack(attack_direction: Vector2) -> void:
 		facing_direction = -1
 		animated_sprite.flip_h = true
 		animated_sprite.play("attack1")
+
 	elif attack_direction == Vector2.RIGHT:
 		facing_direction = 1
 		animated_sprite.flip_h = false
 		animated_sprite.play("attack1")
+
 	else:
 		animated_sprite.play("attack1")
 
-		update_attack_area_position(attack_direction)
+	# 방향과 관계없이 반드시 실행
+	update_attack_area_position(attack_direction)
 
-	# 실제 데미지 판정은 공격 애니메이션 3번 프레임에서
-	# apply_attack_damage()가 처리한다.
+	# 실제 데미지는 공격 애니메이션 타격 프레임에서 처리
 	attack_area.monitoring = false
 	attack_shape.disabled = true
 
@@ -334,9 +341,13 @@ func attack(attack_direction: Vector2) -> void:
 	current_attack = AttackType.NONE
 
 func apply_attack_damage() -> void:
+	# await 도중 current_attack이 바뀌는 상황을 막기 위해 저장
+	var attack_type_at_hit: AttackType = current_attack
+
 	attack_area.monitoring = true
 	attack_shape.disabled = false
 
+	# 히트박스가 실제 물리 판정에 반영될 때까지 1프레임 기다림
 	await get_tree().physics_frame
 
 	for area in attack_area.get_overlapping_areas():
@@ -348,17 +359,43 @@ func apply_attack_damage() -> void:
 		if already_hit_enemies.has(enemy):
 			continue
 
+		var knockback_direction: int = int(sign(
+			enemy.global_position.x - global_position.x
+		))
+
+		if knockback_direction == 0:
+			knockback_direction = facing_direction
+
+		# 어퍼컷
+		if (
+			attack_type_at_hit == AttackType.UPPERCUT
+			and enemy.has_method("take_uppercut_damage")
+		):
+			enemy.take_uppercut_damage(
+				UPPERCUT_DAMAGE,
+				knockback_direction
+			)
+
+			already_hit_enemies.append(enemy)
+			continue
+
+		# 일반 공격
 		if enemy.has_method("take_damage"):
-			var knockback_direction = sign(enemy.global_position.x - global_position.x)
+			enemy.take_damage(
+				ATTACK_DAMAGE,
+				knockback_direction,
+				180.0
+			)
 
-			if knockback_direction == 0:
-				knockback_direction = facing_direction
-
-			enemy.take_damage(ATTACK_DAMAGE, knockback_direction, 180.0)
 			already_hit_enemies.append(enemy)
 
 	attack_area.monitoring = false
 	attack_shape.disabled = true
+
+	# 어퍼컷은 적중 판정을 끝낸 다음 플레이어가 상승
+	# 적을 못 맞혔어도 상승한다.
+	if attack_type_at_hit == AttackType.UPPERCUT:
+		velocity.y = UPPERCUT_PLAYER_VELOCITY
 
 func update_attack_area_position(attack_direction: Vector2) -> void:
 	var attack_distance = 28
